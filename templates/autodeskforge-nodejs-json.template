@@ -1,0 +1,713 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "This workload template deploys an ASG behind an ELB load balancer in two private subnets. The cluster is configured to use an S3 bucket for storage **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template.",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Network Configuration"
+                    },
+                    "Parameters": [
+                        "VPCID",
+                        "PrivateSubnet1ID",
+                        "PrivateSubnet2ID",
+                        "PublicSubnet1ID",
+                        "PublicSubnet2ID"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Amazon EC2 Configuration"
+                    },
+                    "Parameters": [
+                        "KeyPairName",
+                        "BastionSecurityGroupID",
+                        "WorkloadInstanceType"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Workload Nodes Configuration"
+                    },
+                    "Parameters": [
+                        "WorkloadNodesMinSize",
+                        "WorkloadNodesMaxSize",
+                        "WorkloadNodesDesiredCapacity",
+                        "OperatorEmail"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Autodesk Forge Credentials"
+                    },
+                    "Parameters": [
+                        "ForgeClientId",
+                        "ForgeClientSecret"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "AWS Quick Start Configuration"
+                    },
+                    "Parameters": [
+                        "QSS3BucketName",
+                        "QSS3KeyPrefix"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "BastionSecurityGroupID": {
+                    "default": "Bastion Security Group ID"
+                },
+                "KeyPairName": {
+                    "default": "SSH Key Name"
+                },
+                "OperatorEmail": {
+                    "default": "Operator Email"
+                },
+                "ForgeClientId": {
+                    "default": "Forge Client Id"
+                },
+                "ForgeClientSecret": {
+                    "default": "Forge Client Secret"
+                },
+                "PrivateSubnet1ID": {
+                    "default": "Private Subnet 1 ID"
+                },
+                "PrivateSubnet2ID": {
+                    "default": "Private Subnet 2 ID"
+                },
+                "PublicSubnet1ID": {
+                    "default": "Public Subnet 1 ID"
+                },
+                "PublicSubnet2ID": {
+                    "default": "Public Subnet 2 ID"
+                },
+                "QSS3BucketName": {
+                    "default": "Quick Start S3 Bucket Name"
+                },
+                "QSS3KeyPrefix": {
+                    "default": "Quick Start S3 Key Prefix"
+                },
+                "VPCID": {
+                    "default": "VPC ID"
+                },
+                "WorkloadInstanceType": {
+                    "default": "Workload Servers Instance Type"
+                },
+                "WorkloadNodesDesiredCapacity": {
+                    "default": "Workload Nodes Desired Capacity"
+                },
+                "WorkloadNodesMaxSize": {
+                    "default": "Workload Nodes Max Size"
+                },
+                "WorkloadNodesMinSize": {
+                    "default": "Workload Nodes Min Size"
+                }
+            }
+        }
+    },
+    "Parameters": {
+        "BastionSecurityGroupID": {
+            "Description": "ID of the bastion host security group to enable SSH connections (e.g., sg-7f16e910)",
+            "Type": "AWS::EC2::SecurityGroup::Id"
+        },
+        "KeyPairName": {
+            "Description": "Name of an existing EC2 key pair. All instances will launch with this key pair.",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "OperatorEmail": {
+            "AllowedPattern": "([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)",
+            "ConstraintDescription": "Must be a valid email address.",
+            "Description": "Email address that notifications of any scaling operations will be sent to",
+            "Type": "String"
+        },
+        "ForgeClientId": {
+            "ConstraintDescription": "Input your Forge Client ID",
+            "Description": "Find your Client ID here https://developer.autodesk.com/myapps",
+            "Type": "String"
+        },
+        "ForgeClientSecret": {
+            "ConstraintDescription": "Input your Forge Client Secret",
+            "Description": "Find your Client Secret here https://developer.autodesk.com/myapps",
+            "Type": "String"
+        },
+        "PrivateSubnet1ID": {
+            "Description": "ID of private subnet 1 in Availability Zone 1 for the Workload (e.g., subnet-a0246dcd)",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "PrivateSubnet2ID": {
+            "Description": "ID of private subnet 2 in Availability Zone 2 for the Workload (e.g., subnet-b1f432cd)",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "PublicSubnet1ID": {
+            "Description": "ID of public subnet 1 in Availability Zone 1 for the ELB load balancer (e.g., subnet-9bc642ac)",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "PublicSubnet2ID": {
+            "Description": "ID of public subnet 2 in Availability Zone 2 for the ELB load balancer (e.g., subnet-e3246d8e)",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "QSS3BucketName": {
+            "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
+            "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Description": "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Type": "String"
+        },
+        "QSS3KeyPrefix": {
+            "AllowedPattern": "^[0-9a-zA-Z-/]*$",
+            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
+            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
+            "Type": "String"
+        },
+        "VPCID": {
+            "Description": "ID of your existing VPC for deployment",
+            "Type": "AWS::EC2::VPC::Id"
+        },
+        "WorkloadInstanceType": {
+            "AllowedValues": [
+                "t2.nano",
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large"
+            ],
+            "ConstraintDescription": "Must contain valid instance type",
+            "Description": "Type of EC2 instance for the Workload instances",
+            "Type": "String"
+        },
+        "WorkloadNodesDesiredCapacity": {
+            "Description": "The desired capacity for the Workload nodes Auto Scaling group",
+            "Type": "String"
+        },
+        "WorkloadNodesMaxSize": {
+            "Description": "The maximum size of the Auto Scaling group",
+            "Type": "String"
+        },
+        "WorkloadNodesMinSize": {
+            "Description": "The minimum size of the Auto Scaling group",
+            "Type": "String"
+        }
+    },
+    "Rules": {
+        "KeyPairsNotEmpty": {
+            "Assertions": [
+                {
+                    "Assert": {
+                        "Fn::Not": [
+                            {
+                                "Fn::EachMemberEquals": [
+                                    {
+                                        "Fn::RefAll": "AWS::EC2::KeyPair::KeyName"
+                                    },
+                                    ""
+                                ]
+                            }
+                        ]
+                    },
+                    "AssertDescription": "All key pair parameters must not be empty"
+                }
+            ]
+        },
+        "SubnetsInVPC": {
+            "Assertions": [
+                {
+                    "Assert": {
+                        "Fn::EachMemberIn": [
+                            {
+                                "Fn::ValueOfAll": [
+                                    "AWS::EC2::Subnet::Id",
+                                    "VpcId"
+                                ]
+                            },
+                            {
+                                "Fn::RefAll": "AWS::EC2::VPC::Id"
+                            }
+                        ]
+                    },
+                    "AssertDescription": "All subnets must in the VPC"
+                }
+            ]
+        }
+    },
+    "Mappings": {
+        "AWSAMIRegionMap": {
+            "AMI": {
+                "AMZNLINUXHVM": "amzn-ami-hvm-2017.09.1.20180307-x86_64-gp2"
+            },
+            "ap-northeast-1": {
+                "AMZNLINUXHVM": "ami-a77c30c1"
+            },
+            "ap-northeast-2": {
+                "AMZNLINUXHVM": "ami-5e1ab730"
+            },
+            "ap-south-1": {
+                "AMZNLINUXHVM": "ami-7c87d913"
+            },
+            "ap-southeast-1": {
+                "AMZNLINUXHVM": "ami-e2adf99e"
+            },
+            "ap-southeast-2": {
+                "AMZNLINUXHVM": "ami-43874721"
+            },
+            "ca-central-1": {
+                "AMZNLINUXHVM": "ami-5b55d23f"
+            },
+            "eu-central-1": {
+                "AMZNLINUXHVM": "ami-ac442ac3"
+            },
+            "eu-west-1": {
+                "AMZNLINUXHVM": "ami-3bfab942"
+            },
+            "eu-west-2": {
+                "AMZNLINUXHVM": "ami-dff017b8"
+            },
+            "sa-east-1": {
+                "AMZNLINUXHVM": "ami-5339733f"
+            },
+            "us-east-1": {
+                "AMZNLINUXHVM": "ami-1853ac65"
+            },
+            "us-east-2": {
+                "AMZNLINUXHVM": "ami-25615740"
+            },
+            "us-west-1": {
+                "AMZNLINUXHVM": "ami-bf5540df"
+            },
+            "us-west-2": {
+                "AMZNLINUXHVM": "ami-d874e0a0"
+            }
+        }
+    },
+    "Resources": {
+        "ForgeClientIdSSMParameter": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+                "Name": "ForgeClientIdSSM",
+                "Type": "String",
+                "Value": {
+                    "Ref": "ForgeClientId"
+                },
+                "Description": "Forge Client ID from SSM"
+            }
+        }, 
+        "ForgeClientSecretSSMParameter": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+                "Name": "ForgeClientSecretSSM",
+                "Type": "String",
+                "Value": {
+                    "Ref": "ForgeClientSecret"
+                },
+                "Description": "Forge Client Secret from SSM"
+            }
+        },
+        "NotificationTopic": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+                "Subscription": [
+                    {
+                        "Endpoint": {
+                            "Ref": "OperatorEmail"
+                        },
+                        "Protocol": "email"
+                    }
+                ]
+            }
+        },
+        "ELBSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Allow access to the ELB",
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "3000",
+                        "ToPort": "3000",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
+        "ElasticLoadBalancer": {
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+            "Properties": {
+                "Subnets": [
+                    {
+                        "Ref": "PublicSubnet1ID"
+                    },
+                    {
+                        "Ref": "PublicSubnet2ID"
+                    }
+                ],
+                "SecurityGroups": [
+                    {
+                        "Ref": "ELBSecurityGroup"
+                    }
+                ],
+                "AppCookieStickinessPolicy": [
+                    {
+                        "CookieName": "dummy",
+                        "PolicyName": "WorkloadCookieStickinessPolicy"
+                    }
+                ],
+                "Listeners": [
+                    {
+                        "LoadBalancerPort": "3000",
+                        "InstancePort": "3000",
+                        "Protocol": "HTTP",
+                        "PolicyNames": [
+                            "WorkloadCookieStickinessPolicy"
+                        ]
+                    }
+                ],
+                "CrossZone": "true",
+                "HealthCheck": {
+                    "Target": "TCP:3000",
+                    "HealthyThreshold": "2",
+                    "UnhealthyThreshold": "3",
+                    "Interval": "30",
+                    "Timeout": "3"
+                }
+            }
+        },
+        "SetupRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:GetObject"
+                                    ],
+                                    "Resource": {
+                                        "Fn::Sub": "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                                    },
+                                    "Effect": "Allow"
+                                }
+                            ]
+                        },
+                        "PolicyName": "aws-quick-start-s3-policy"
+                    },
+                    {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "ssm:Describe*",
+                                        "ssm:Get*",
+                                        "ssm:List*"
+                                    ],
+                                    "Resource": "*"
+                                }
+                            ]
+                        },
+                        "PolicyName": "aws-quick-start-forge-ssm-policy"
+                    }
+                ]
+            }
+        },
+        "SetupRoleProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "SetupRole"
+                    }
+                ]
+            }
+        },
+        "WorkloadSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Allow access to the Workload instances",
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "3000",
+                        "ToPort": "3000",
+                        "SourceSecurityGroupId": {
+                            "Ref": "ELBSecurityGroup"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "SourceSecurityGroupId": {
+                            "Ref": "BastionSecurityGroupID"
+                        }
+                    }
+                ]
+            }
+        },
+        "WorkloadASLaunchConfig": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "configSets": {
+                        "quickstart": [
+                            "install",
+                            "configure",
+                            "cleanup"
+                        ]
+                    },
+                    "install": {},
+                    "configure": {},
+                    "cleanup": {}
+                }
+            },
+            "Properties": {
+                "KeyName": {
+                    "Ref": "KeyPairName"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "AMZNLINUXHVM"
+                    ]
+                },
+                "InstanceMonitoring": "true",
+                "IamInstanceProfile": {
+                    "Ref": "SetupRoleProfile"
+                },
+                "InstanceType": {
+                    "Ref": "WorkloadInstanceType"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "WorkloadSecurityGroup"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -ex\n",
+                                "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1\n",
+                                "# update AWS cfn bootsrap\n",
+                                "# yum update -y aws-cfn-bootstrap\n",
+                                "curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -\n",
+                                "yum -y install nodejs\n",
+                                "# install pm2 to restart node app\n",
+                                "npm i -g pm2@2.4.3\n",
+                                "echo export FORGE_AWS_FLAG=1 >> /etc/profile\n",
+                                "echo export AWS_REGION=",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                " >> /etc/profile\n",
+                                "source /etc/profile\n",
+                                {
+                                  "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/autodesk-forge-nodejs-aws.zip .\n"
+                                },
+                                "unzip autodesk-forge-nodejs-aws.zip\n",
+                                "cd autodesk-forge-nodejs-aws\n",
+                                "pwd\n",
+                                "npm install\n",
+                                "pm2 start /autodesk-forge-nodejs-aws/start.js -i 0 --name forge-node-app\n",
+                                "/opt/aws/bin/cfn-init --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource WorkloadASLaunchConfig --configsets quickstart --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n",
+                                "# Signal the status from cfn-init\n",
+                                "/opt/aws/bin/cfn-signal -e $? --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource WorkloadAutoScalingGroup --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "WorkloadScaleUpPolicy": {
+            "Type": "AWS::AutoScaling::ScalingPolicy",
+            "Properties": {
+                "AdjustmentType": "ChangeInCapacity",
+                "AutoScalingGroupName": {
+                    "Ref": "WorkloadAutoScalingGroup"
+                },
+                "Cooldown": "300",
+                "ScalingAdjustment": "1"
+            }
+        },
+        "WorkloadScaleDownPolicy": {
+            "Type": "AWS::AutoScaling::ScalingPolicy",
+            "Properties": {
+                "AdjustmentType": "ChangeInCapacity",
+                "AutoScalingGroupName": {
+                    "Ref": "WorkloadAutoScalingGroup"
+                },
+                "Cooldown": "300",
+                "ScalingAdjustment": "-1"
+            }
+        },
+        "CPUAlarmHigh": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmDescription": "Scale-up if CPU > 60% for 5 minutes",
+                "MetricName": "CPUUtilization",
+                "Namespace": "AWS/EC2",
+                "Statistic": "Average",
+                "Period": "60",
+                "EvaluationPeriods": "5",
+                "Threshold": "60",
+                "AlarmActions": [
+                    {
+                        "Ref": "WorkloadScaleUpPolicy"
+                    }
+                ],
+                "Dimensions": [
+                    {
+                        "Name": "AutoScalingGroupName",
+                        "Value": {
+                            "Ref": "WorkloadAutoScalingGroup"
+                        }
+                    }
+                ],
+                "ComparisonOperator": "GreaterThanThreshold"
+            }
+        },
+        "CPUAlarmLow": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmDescription": "Scale-down if CPU < 40% for 30 minutes",
+                "MetricName": "CPUUtilization",
+                "Namespace": "AWS/EC2",
+                "Statistic": "Average",
+                "Period": "60",
+                "EvaluationPeriods": "30",
+                "Threshold": "40",
+                "AlarmActions": [
+                    {
+                        "Ref": "WorkloadScaleDownPolicy"
+                    }
+                ],
+                "Dimensions": [
+                    {
+                        "Name": "AutoScalingGroupName",
+                        "Value": {
+                            "Ref": "WorkloadAutoScalingGroup"
+                        }
+                    }
+                ],
+                "ComparisonOperator": "LessThanThreshold"
+            }
+        },
+        "WorkloadAutoScalingGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "VPCZoneIdentifier": [
+                    {
+                        "Ref": "PrivateSubnet1ID"
+                    },
+                    {
+                        "Ref": "PrivateSubnet2ID"
+                    }
+                ],
+                "Cooldown": "600",
+                "DesiredCapacity": {
+                    "Ref": "WorkloadNodesDesiredCapacity"
+                },
+                "HealthCheckGracePeriod": "600",
+                "HealthCheckType": "EC2",
+                "LaunchConfigurationName": {
+                    "Ref": "WorkloadASLaunchConfig"
+                },
+                "LoadBalancerNames": [
+                    {
+                        "Ref": "ElasticLoadBalancer"
+                    }
+                ],
+                "MaxSize": {
+                    "Ref": "WorkloadNodesMaxSize"
+                },
+                "MinSize": {
+                    "Ref": "WorkloadNodesMinSize"
+                },
+                "NotificationConfiguration": {
+                    "TopicARN": {
+                        "Ref": "NotificationTopic"
+                    },
+                    "NotificationTypes": [
+                        "autoscaling:EC2_INSTANCE_LAUNCH",
+                        "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
+                        "autoscaling:EC2_INSTANCE_TERMINATE",
+                        "autoscaling:EC2_INSTANCE_TERMINATE_ERROR",
+                        "autoscaling:TEST_NOTIFICATION"
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Autodesk Forge NodeJS Instance",
+                        "PropagateAtLaunch": "true"
+                    }
+                ]
+            },
+            "CreationPolicy": {
+                "ResourceSignal": {
+                    "Count": {
+                        "Ref": "WorkloadNodesDesiredCapacity"
+                    },
+                    "Timeout": "PT2H"
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "ELBDNSName": {
+            "Description": "ELB DNS Name",
+            "Value": {
+                "Fn::GetAtt": [
+                    "ElasticLoadBalancer",
+                    "DNSName"
+                ]
+            }
+        }
+    }
+}
