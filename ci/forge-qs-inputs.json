@@ -1,0 +1,87 @@
+[
+    {
+        "ParameterKey": "AvailabilityZones",
+        "ParameterValue": "$[taskcat_genaz_2]"
+    },
+    {
+        "ParameterKey": "StackName",
+        "ParameterValue": "Forgetaskcat"
+    },
+    {
+        "ParameterKey": "BastionAMIOS",
+        "ParameterValue": "Amazon-Linux-HVM"
+    },
+    {
+        "ParameterKey": "BastionAMIOS",
+        "ParameterValue": "Amazon-Linux-HVM"
+
+    },
+    {
+        "ParameterKey": "BastionInstanceType",
+        "ParameterValue": "t2.micro"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "jaimenvm-key"
+    },
+    {
+        "ParameterKey":"OperatorEmail",
+        "ParameterValue": "jaimerosales.duque@gmail.com"
+    },
+    {
+        "ParameterKey": "ForgeClientId",
+        "ParameterValue": "p54EA5DMhYMfl20T47wn5Zs8I6Ltviz1"
+    },
+    {
+        "ParameterKey":    "ForgeClientSecret",
+        "ParameterValue": "AOKAGsXfLCJCS6yI"
+    },
+    {
+        "ParameterKey":  "PrivateSubnet1CIDR",
+        "ParameterValue": "10.0.0.0/19"
+    },
+    {
+        "ParameterKey":"PrivateSubnet2CIDR",
+        "ParameterValue": "10.0.32.0/19"
+    },
+    {
+        "ParameterKey": "PublicSubnet1CIDR",
+        "ParameterValue": "10.0.128.0/20"
+    },
+    {
+        "ParameterKey":"PublicSubnet2CIDR",
+        "ParameterValue": "10.0.144.0/20"
+    },
+    {
+        "ParameterKey":"QSS3BucketName",
+        "ParameterValue": "autodesk-forge-qs"
+    },
+    {
+        "ParameterKey": "QSS3KeyPrefix",
+        "ParameterValue": "quickstart-examples/"
+    },
+    {
+        "ParameterKey": "RemoteAccessCIDR",
+        "ParameterValue": "0.0.0.0/0"
+    },
+    {
+        "ParameterKey": "VPCCIDR",
+        "ParameterValue": "10.0.0.0/16"
+    },
+    {
+        "ParameterKey": "WorkloadInstanceType",
+        "ParameterValue": "t2.micro"
+    },
+    {
+        "ParameterKey":"WorkloadNodesDesiredCapacity",
+        "ParameterValue": "2"
+    },
+    {
+        "ParameterKey": "WorkloadNodesMaxSize",
+        "ParameterValue": "4"
+    },
+    {
+        "ParameterKey":"WorkloadNodesMinSize",
+        "ParameterValue": "2"
+    }
+]
