@@ -23,7 +23,7 @@
                     "Parameters": [
                         "KeyPairName",
                         "BastionSecurityGroupID",
-                        "WorkloadInstanceType"
+                        "ForgeNodeInstanceType"
                     ]
                 },
                 {
@@ -31,9 +31,9 @@
                         "default": "Workload Nodes Configuration"
                     },
                     "Parameters": [
-                        "WorkloadNodesMinSize",
-                        "WorkloadNodesMaxSize",
-                        "WorkloadNodesDesiredCapacity",
+                        "ForgeNodesMinSize",
+                        "ForgeNodesMaxSize",
+                        "ForgeNodesDesiredCapacity",
                         "OperatorEmail"
                     ]
                 },
@@ -93,16 +93,16 @@
                 "VPCID": {
                     "default": "VPC ID"
                 },
-                "WorkloadInstanceType": {
+                "ForgeNodeInstanceType": {
                     "default": "Workload Servers Instance Type"
                 },
-                "WorkloadNodesDesiredCapacity": {
+                "ForgeNodesDesiredCapacity": {
                     "default": "Workload Nodes Desired Capacity"
                 },
-                "WorkloadNodesMaxSize": {
+                "ForgeNodesMaxSize": {
                     "default": "Workload Nodes Max Size"
                 },
-                "WorkloadNodesMinSize": {
+                "ForgeNodesMinSize": {
                     "default": "Workload Nodes Min Size"
                 }
             }
@@ -171,7 +171,7 @@
             "Description": "ID of your existing VPC for deployment",
             "Type": "AWS::EC2::VPC::Id"
         },
-        "WorkloadInstanceType": {
+        "ForgeNodeInstanceType": {
             "AllowedValues": [
                 "t2.nano",
                 "t2.micro",
@@ -183,15 +183,15 @@
             "Description": "Type of EC2 instance for the Workload instances",
             "Type": "String"
         },
-        "WorkloadNodesDesiredCapacity": {
+        "ForgeNodesDesiredCapacity": {
             "Description": "The desired capacity for the Workload nodes Auto Scaling group",
             "Type": "String"
         },
-        "WorkloadNodesMaxSize": {
+        "ForgeNodesMaxSize": {
             "Description": "The maximum size of the Auto Scaling group",
             "Type": "String"
         },
-        "WorkloadNodesMinSize": {
+        "ForgeNodesMinSize": {
             "Description": "The minimum size of the Auto Scaling group",
             "Type": "String"
         }
@@ -512,7 +512,7 @@
                     "Ref": "SetupRoleProfile"
                 },
                 "InstanceType": {
-                    "Ref": "WorkloadInstanceType"
+                    "Ref": "ForgeNodeInstanceType"
                 },
                 "SecurityGroups": [
                     {
@@ -659,7 +659,7 @@
                 ],
                 "Cooldown": "600",
                 "DesiredCapacity": {
-                    "Ref": "WorkloadNodesDesiredCapacity"
+                    "Ref": "ForgeNodesDesiredCapacity"
                 },
                 "HealthCheckGracePeriod": "600",
                 "HealthCheckType": "EC2",
@@ -672,10 +672,10 @@
                     }
                 ],
                 "MaxSize": {
-                    "Ref": "WorkloadNodesMaxSize"
+                    "Ref": "ForgeNodesMaxSize"
                 },
                 "MinSize": {
-                    "Ref": "WorkloadNodesMinSize"
+                    "Ref": "ForgeNodesMinSize"
                 },
                 "NotificationConfiguration": {
                     "TopicARN": {
@@ -700,7 +700,7 @@
             "CreationPolicy": {
                 "ResourceSignal": {
                     "Count": {
-                        "Ref": "WorkloadNodesDesiredCapacity"
+                        "Ref": "ForgeNodesDesiredCapacity"
                     },
                     "Timeout": "PT2H"
                 }

@@ -26,7 +26,7 @@
                         "KeyPairName",
                         "BastionAMIOS",
                         "BastionInstanceType",
-                        "WorkloadInstanceType"
+                        "ForgeNodeInstanceType"
                     ]
                 },
                 {
@@ -34,7 +34,7 @@
                         "default": "Workload Nodes Configuration"
                     },
                     "Parameters": [
-                        "WorkloadNodesMinSize",
+                        "ForgeNodesMinSize",
                         "OperatorEmail"
                     ]
                 },
@@ -103,16 +103,16 @@
                 "VPCCIDR": {
                     "default": "VPC CIDR"
                 },
-                "WorkloadInstanceType": {
+                "ForgeNodeInstanceType": {
                     "default": "Workload Servers Instance Type"
                 },
-                "WorkloadNodesDesiredCapacity": {
+                "ForgeNodesDesiredCapacity": {
                     "default": "Workload Nodes Desired Capacity"
                 },
-                "WorkloadNodesMaxSize": {
+                "ForgeNodesMaxSize": {
                     "default": "Workload Nodes Max Size"
                 },
-                "WorkloadNodesMinSize": {
+                "ForgeNodesMinSize": {
                     "default": "Workload Nodes Min Size"
                 }
             }
@@ -225,7 +225,7 @@
             "Description": "CIDR block for the VPC",
             "Type": "String"
         },
-        "WorkloadInstanceType": {
+        "ForgeNodeInstanceType": {
             "AllowedValues": [
                 "t2.nano",
                 "t2.micro",
@@ -238,17 +238,17 @@
             "Description": "EC2 instance type for the Workload instances",
             "Type": "String"
         },
-        "WorkloadNodesDesiredCapacity": {
+        "ForgeNodesDesiredCapacity": {
             "Default": "2",
             "Description": "The desired capacity for the Workload nodes Auto Scaling group",
             "Type": "String"
         },
-        "WorkloadNodesMaxSize": {
+        "ForgeNodesMaxSize": {
             "Default": "4",
             "Description": "The maximum size of the Auto Scaling group",
             "Type": "String"
         },
-        "WorkloadNodesMinSize": {
+        "ForgeNodesMinSize": {
             "Default": "2",
             "Description": "The minimum size of the Auto Scaling group",
             "Type": "String"
@@ -339,25 +339,25 @@
                 }
             }
         },
-        "WorkloadStack": {
+        "ForgeNodeJSStack": {
             "DependsOn": "BastionStack",
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/autodeskforge-nodejs-json.template"
+                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/autodesk-forge-nodejs.json"
                 },
                 "Parameters": {
-                    "WorkloadInstanceType": {
-                        "Ref": "WorkloadInstanceType"
+                    "ForgeNodeInstanceType": {
+                        "Ref": "ForgeNodeInstanceType"
                     },
-                    "WorkloadNodesDesiredCapacity": {
-                        "Ref": "WorkloadNodesDesiredCapacity"
+                    "ForgeNodesDesiredCapacity": {
+                        "Ref": "ForgeNodesDesiredCapacity"
                     },
-                    "WorkloadNodesMaxSize": {
-                        "Ref": "WorkloadNodesMaxSize"
+                    "ForgeNodesMaxSize": {
+                        "Ref": "ForgeNodesMaxSize"
                     },
-                    "WorkloadNodesMinSize": {
-                        "Ref": "WorkloadNodesMinSize"
+                    "ForgeNodesMinSize": {
+                        "Ref": "ForgeNodesMinSize"
                     },
                     "BastionSecurityGroupID": {
                         "Fn::GetAtt": [
