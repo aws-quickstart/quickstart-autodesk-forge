@@ -54,11 +54,11 @@
     },
     {
         "ParameterKey":"QSS3BucketName",
-        "ParameterValue": "autodesk-forge-qs"
+        "ParameterValue": "autodesk-forge-cfqs"
     },
     {
         "ParameterKey": "QSS3KeyPrefix",
-        "ParameterValue": "quickstart-examples/"
+        "ParameterValue": "quickstart-autodesk-forge/"
     },
     {
         "ParameterKey": "RemoteAccessCIDR",
