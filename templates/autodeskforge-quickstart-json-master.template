@@ -216,7 +216,6 @@
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
             "Description": "The CIDR IP range that is permitted to access the bastions. We recommend that you set this value to a trusted IP range.",
-            "Default": "0.0.0.0/0",
             "Type": "String"
         },
         "VPCCIDR": {
@@ -401,6 +400,9 @@
                             "VPCStack",
                             "Outputs.PublicSubnet2ID"
                         ]
+                    },
+                    "RemoteAccessCIDR": {
+                        "Ref": "RemoteAccessCIDR"
                     },
                     "QSS3BucketName": {
                         "Ref": "QSS3BucketName"
