@@ -4,17 +4,12 @@
         "ParameterValue": "$[taskcat_genaz_2]"
     },
     {
-        "ParameterKey": "StackName",
-        "ParameterValue": "Forgetaskcat"
-    },
-    {
         "ParameterKey": "BastionAMIOS",
         "ParameterValue": "Amazon-Linux-HVM"
     },
     {
         "ParameterKey": "BastionAMIOS",
         "ParameterValue": "Amazon-Linux-HVM"
-
     },
     {
         "ParameterKey": "BastionInstanceType",
@@ -54,15 +49,15 @@
     },
     {
         "ParameterKey":"QSS3BucketName",
-        "ParameterValue": "autodesk-forge-qs"
+        "ParameterValue": "autodesk-forge-cloudformation"
     },
     {
         "ParameterKey": "QSS3KeyPrefix",
-        "ParameterValue": "quickstart-examples/"
+        "ParameterValue": "quickstart-autodesk-forge/"
     },
     {
         "ParameterKey": "RemoteAccessCIDR",
-        "ParameterValue": "0.0.0.0/0"
+        "ParameterValue": "132.188.0.0/16"
     },
     {
         "ParameterKey": "VPCCIDR",
