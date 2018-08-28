@@ -35,7 +35,6 @@
                     },
                     "Parameters": [
                         "WorkloadNodesMinSize",
-                        "NodesMaxSize",
                         "OperatorEmail"
                     ]
                 },
@@ -107,7 +106,7 @@
                 "WorkloadInstanceType": {
                     "default": "Workload Servers Instance Type"
                 },
-                "WorkloadoNodesDesiredCapacity": {
+                "WorkloadNodesDesiredCapacity": {
                     "default": "Workload Nodes Desired Capacity"
                 },
                 "WorkloadNodesMaxSize": {
@@ -120,10 +119,6 @@
         }
     },
     "Parameters": {
-        "StackName": {
-            "Description": "Name of Stack",
-            "Type": "String"
-        },
         "AvailabilityZones": {
             "Description": "List of Availability Zones to use for the subnets in the VPC. Only two Availability Zones are used for this deployment, and the logical order of your selections is preserved.",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"

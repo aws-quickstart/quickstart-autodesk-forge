@@ -4,10 +4,6 @@
         "ParameterValue": "$[taskcat_genaz_2]"
     },
     {
-        "ParameterKey": "StackName",
-        "ParameterValue": "Forgetaskcat"
-    },
-    {
         "ParameterKey": "BastionAMIOS",
         "ParameterValue": "Amazon-Linux-HVM"
     },
