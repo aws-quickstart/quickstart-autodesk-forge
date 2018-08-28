@@ -64,19 +64,19 @@
         "ParameterValue": "10.0.0.0/16"
     },
     {
-        "ParameterKey": "WorkloadInstanceType",
+        "ParameterKey": "ForgeNodeInstanceType",
         "ParameterValue": "t2.micro"
     },
     {
-        "ParameterKey":"WorkloadNodesDesiredCapacity",
+        "ParameterKey":"ForgeNodesDesiredCapacity",
         "ParameterValue": "2"
     },
     {
-        "ParameterKey": "WorkloadNodesMaxSize",
+        "ParameterKey": "ForgeNodesMaxSize",
         "ParameterValue": "4"
     },
     {
-        "ParameterKey":"WorkloadNodesMinSize",
+        "ParameterKey":"ForgeNodesMinSize",
         "ParameterValue": "2"
     }
 ]
