@@ -12,4 +12,4 @@ tests:
     parameter_input: forge-qs-inputs.json
     regions:
       - eu-west-1
-    template_file: autodeskforge-quickstart-json-master.template
+    template_file: autodesk-forge-master.json
