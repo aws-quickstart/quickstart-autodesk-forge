@@ -2,7 +2,7 @@
 global:
   owner: quickstart-eng@amazon.com
   qsname: quickstart-autodesk-forge
-  s3bucket: autodesk-forge-qs
+  s3bucket: autodesk-forge-cfqs
   #s3bucket: taskcat-sample-taskcat-project-a1c14bc9
   regions:
     - eu-west-1
