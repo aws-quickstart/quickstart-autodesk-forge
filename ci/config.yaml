@@ -8,7 +8,7 @@ global:
     - eu-west-1
   reporting: true
 tests:
-  taskcat-json:
+  forge-nodejs:
     parameter_input: forge-qs-inputs.json
     regions:
       - eu-west-1

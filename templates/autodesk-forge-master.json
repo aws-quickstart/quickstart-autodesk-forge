@@ -119,6 +119,11 @@
         }
     },
     "Parameters": {
+        "ALBSSLCertificateARN": {
+            "Default": "",
+            "Description": "[Optional] The ARN of the SSL certificate to be used for the Application Load Balancer",
+            "Type": "String"
+        },
         "AvailabilityZones": {
             "Description": "List of Availability Zones to use for the subnets in the VPC. Only two Availability Zones are used for this deployment, and the logical order of your selections is preserved.",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"
@@ -161,13 +166,13 @@
         "ForgeClientId": {
             "ConstraintDescription": "Input your Forge Client ID",
             "Description": "Find your Client ID here https://developer.autodesk.com/myapps",
-            "Default": "p54EA5DMhYMfl20T47wn5Zs8I6Ltviz1",
+            "NoEcho": "True",
             "Type": "String"
         },
         "ForgeClientSecret": {
             "ConstraintDescription": "Input your Forge Client Secret",
             "Description": "Find your Client Secret here https://developer.autodesk.com/myapps",
-            "Default": "AOKAGsXfLCJCS6yI",
+            "NoEcho": "True",
             "Type": "String"
         },
         "PrivateSubnet1CIDR": {
@@ -218,6 +223,11 @@
             "Description": "The CIDR IP range that is permitted to access the bastions. We recommend that you set this value to a trusted IP range.",
             "Type": "String"
         },
+        "Route53HostedZoneId": {
+            "Description": "Route53 Hosted Zone ID",
+            "Type": "String",
+            "Default": ""
+        },
         "VPCCIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
@@ -252,6 +262,101 @@
             "Default": "2",
             "Description": "The minimum size of the Auto Scaling group",
             "Type": "String"
+        },
+        "ForgeSiteDomain": {
+            "Description": "Domain name of the site. e.g. example.com. Valid FQDN required when using SSL. Leave the default localhost.local for test environments.",
+            "AllowedPattern": "(?!-)[a-zA-Z0-9-.]*(?<!-)",
+            "ConstraintDescription": "Must be a valid fully-qualified domain name.",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Rules": {
+        "KeyPairsNotEmpty": {
+            "Assertions": [
+                {
+                    "Assert": {
+                        "Fn::Not": [
+                            {
+                                "Fn::EachMemberEquals": [
+                                    {
+                                        "Fn::RefAll": "AWS::EC2::KeyPair::KeyName"
+                                    },
+                                    ""
+                                ]
+                            }
+                        ]
+                    },
+                    "AssertDescription": "All key pair parameters must not be empty"
+                }
+            ]
+        },
+        "SubnetsInVPC": {
+            "Assertions": [
+                {
+                    "Assert": {
+                        "Fn::EachMemberIn": [
+                            {
+                                "Fn::ValueOfAll": [
+                                    "AWS::EC2::Subnet::Id",
+                                    "VpcId"
+                                ]
+                            },
+                            {
+                                "Fn::RefAll": "AWS::EC2::VPC::Id"
+                            }
+                        ]
+                    },
+                    "AssertDescription": "All subnets must in the VPC"
+                }
+            ]
+        },
+        "SslAndRoute53Rule": {
+            "RuleCondition": {
+                "Fn::Or": [
+                    {
+                        "Fn::Not": [
+                            {
+                                "Fn::Equals": [
+                                    {
+                                        "Ref": "ALBSSLCertificateARN"
+                                    },
+                                    ""
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Fn::Not": [
+                            {
+                                "Fn::Equals": [
+                                    {
+                                        "Ref": "Route53HostedZoneId"
+                                    },
+                                    ""
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "Assertions": [
+                {
+                    "Assert": {
+                        "Fn::Not": [
+                            {
+                                "Fn::Equals": [
+                                    {
+                                        "Ref": "ForgeSiteDomain"
+                                    },
+                                    ""
+                                ]
+                            }
+                        ]
+                    },
+                    "AssertDescription": "Parameter ForgeSiteDomain cannot be empty and must provide FQDN e.g. example.com, when ALBSSLCertificateARN or Route53HostedZoneId values are provided."
+                }
+            ]
         }
     },
     "Resources": {
@@ -409,6 +514,15 @@
                     },
                     "QSS3KeyPrefix": {
                         "Ref": "QSS3KeyPrefix"
+                    },
+                    "ALBSSLCertificateARN": {
+                        "Ref": "ALBSSLCertificateARN"
+                    },
+                    "Route53HostedZoneId": {
+                        "Ref": "Route53HostedZoneId"
+                    },
+                    "ForgeSiteDomain": {
+                        "Ref": "ForgeSiteDomain"
                     },
                     "VPCID": {
                         "Fn::GetAtt": [
