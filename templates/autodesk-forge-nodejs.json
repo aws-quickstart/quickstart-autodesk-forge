@@ -538,6 +538,16 @@
                                     "Ref": "AWS::Region"
                                 },
                                 " >> /etc/profile\n",
+                                "echo export FORGE_CLIENT_ID_PARAM=",
+                                {
+                                    "Ref": "ForgeClientIdSSMParameter"
+                                },
+                                " >> /etc/profile\n",
+                                "echo export FORGE_CLIENT_SECRET_PARAM=",
+                                {
+                                    "Ref": "ForgeClientSecretSSMParameter"
+                                },
+                                " >> /etc/profile\n",
                                 "source /etc/profile\n",
                                 {
                                   "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/autodesk-forge-nodejs-aws.zip .\n"

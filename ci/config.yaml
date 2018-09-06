@@ -2,14 +2,14 @@
 global:
   owner: quickstart-eng@amazon.com
   qsname: quickstart-autodesk-forge
-  s3bucket: autodesk-forge-cloudformation
+  s3bucket: autodesk-forge-cfqs
   #s3bucket: taskcat-sample-taskcat-project-a1c14bc9
   regions:
-    - us-east-2
+    - eu-west-1
   reporting: true
 tests:
-  taskcat-json:
+  forge-nodejs:
     parameter_input: forge-qs-inputs.json
     regions:
-      - us-east-2
-    template_file: autodeskforge-quickstart-json-master.template
+      - eu-west-1
+    template_file: autodesk-forge-master.json
