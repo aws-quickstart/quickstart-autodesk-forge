@@ -189,7 +189,20 @@
                 "t2.micro",
                 "t2.small",
                 "t2.medium",
-                "t2.large"
+                "t2.large",
+                "t2.xlarge",
+                "t2.2xlarge",
+                "t3.nano",
+                "t3.micro",
+                "t3.small",
+                "t3.medium",
+                "t3.large",
+                "t3.xlarge",
+                "t3.2xlarge",
+                "m5.large",
+                "m5.xlarge",
+                "m5.2xlarge",
+                "m5.4xlarge"
             ],
             "ConstraintDescription": "Must contain valid instance type",
             "Description": "Type of EC2 instance for the Workload instances",
@@ -343,54 +356,125 @@
                     "AssertDescription": "Parameter ForgeSiteDomain cannot be empty and must provide FQDN e.g. example.com, when ALBSSLCertificateARN or Route53HostedZoneId values are provided."
                 }
             ]
+        },
+        "T3InstanceSupportedRegionRule": {
+            "Assertions": [
+                {
+                    "Assert": {
+                        "Fn::Not": [
+                            {
+                                "Fn::And": [
+                                    {
+                                        "Fn::Contains": [
+                                            [
+                                                "ap-northeast-2",
+                                                "ap-northeast-3",
+                                                "ap-south-1",
+                                                "eu-west-3"
+                                            ],
+                                            {
+                                                "Ref": "AWS::Region"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "Fn::Contains": [
+                                            [
+                                                "t3.nano",
+                                                "t3.micro",
+                                                "t3.small",
+                                                "t3.medium",
+                                                "t3.large",
+                                                "t3.xlarge",
+                                                "t3.2xlarge"
+                                            ],
+                                            {
+                                                "Ref": "ForgeNodeInstanceType"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "AssertDescription": "T3 instances are not supported in Seoul (ap-northeast-2), Osaka-Local (ap-northeast-3), Mumbai (ap-south-1) and Paris (eu-west-3) regions. Please launch the stack with another instance type."
+                }
+            ]
+        },
+        "TwoAZsRequiredRegionRule": {
+            "Assertions": [
+                {
+                    "Assert": {
+                        "Fn::Not": [
+                            {
+                                "Fn::Contains": [
+                                    [
+                                        "ap-northeast-3"
+                                    ],
+                                    {
+                                        "Ref": "AWS::Region"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "AssertDescription": "This Quick Start requires two Availability Zones and not supported in Osaka-Local (ap-northeast-3) region. Please launch the stack in another region to continue."
+                }
+            ]
         }
     },
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "AMZNLINUXHVM": "amzn-ami-hvm-2017.09.1.20180307-x86_64-gp2"
+                "AMZNLINUXHVM": "amzn-ami-hvm-2018.03.0.20180811-x86_64-gp2"
             },
             "ap-northeast-1": {
-                "AMZNLINUXHVM": "ami-a77c30c1"
+                "AMZNLINUXHVM": "ami-06cd52961ce9f0d85"
             },
             "ap-northeast-2": {
-                "AMZNLINUXHVM": "ami-5e1ab730"
+                "AMZNLINUXHVM": "ami-0a10b2721688ce9d2"
+            },
+            "ap-northeast-3": {
+                "AMZNLINUXHVM": "ami-0d98120a9fb693f07"
             },
             "ap-south-1": {
-                "AMZNLINUXHVM": "ami-7c87d913"
+                "AMZNLINUXHVM": "ami-0912f71e06545ad88"
             },
             "ap-southeast-1": {
-                "AMZNLINUXHVM": "ami-e2adf99e"
+                "AMZNLINUXHVM": "ami-08569b978cc4dfa10"
             },
             "ap-southeast-2": {
-                "AMZNLINUXHVM": "ami-43874721"
+                "AMZNLINUXHVM": "ami-09b42976632b27e9b"
             },
             "ca-central-1": {
-                "AMZNLINUXHVM": "ami-5b55d23f"
+                "AMZNLINUXHVM": "ami-0b18956f"
             },
             "eu-central-1": {
-                "AMZNLINUXHVM": "ami-ac442ac3"
+                "AMZNLINUXHVM": "ami-0233214e13e500f77"
             },
             "eu-west-1": {
-                "AMZNLINUXHVM": "ami-3bfab942"
+                "AMZNLINUXHVM": "ami-047bb4163c506cd98"
             },
             "eu-west-2": {
-                "AMZNLINUXHVM": "ami-dff017b8"
+                "AMZNLINUXHVM": "ami-f976839e"
+            },
+            "eu-west-3": {
+                "AMZNLINUXHVM": "ami-0ebc281c20e89ba4b"
             },
             "sa-east-1": {
-                "AMZNLINUXHVM": "ami-5339733f"
+                "AMZNLINUXHVM": "ami-07b14488da8ea02a0"
             },
             "us-east-1": {
-                "AMZNLINUXHVM": "ami-1853ac65"
+                "AMZNLINUXHVM": "ami-0ff8a91507f77f867"
             },
             "us-east-2": {
-                "AMZNLINUXHVM": "ami-25615740"
+                "AMZNLINUXHVM": "ami-0b59bfac6be064b78"
             },
             "us-west-1": {
-                "AMZNLINUXHVM": "ami-bf5540df"
+                "AMZNLINUXHVM": "ami-0bdb828fd58c52235"
             },
             "us-west-2": {
-                "AMZNLINUXHVM": "ami-d874e0a0"
+                "AMZNLINUXHVM": "ami-a0cfeed8"
             }
         }
     },
