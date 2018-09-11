@@ -33,9 +33,14 @@ tests:
       - eu-west-1
       - eu-west-2
       - eu-west-3
-      - sa-east-1
       - us-east-1
       - us-east-2
       - us-west-1
       - us-west-2
     template_file: autodesk-forge-master.json
+  forge-sa-east-1:
+    parameter_input: forge-sa-east-1.json
+    regions:
+      - sa-east-1
+    template_file: autodesk-forge-master.json
+
