@@ -1,0 +1,82 @@
+[
+    {
+        "ParameterKey": "AvailabilityZones",
+        "ParameterValue": "$[taskcat_genaz_2]"
+    },
+    {
+        "ParameterKey": "BastionAMIOS",
+        "ParameterValue": "Amazon-Linux-HVM"
+    },
+    {
+        "ParameterKey": "BastionAMIOS",
+        "ParameterValue": "Amazon-Linux-HVM"
+    },
+    {
+        "ParameterKey": "BastionInstanceType",
+        "ParameterValue": "t2.micro"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "$[taskcat_getkeypair]"
+    },
+    {
+        "ParameterKey":"OperatorEmail",
+        "ParameterValue": "forge-test@example.com"
+    },
+    {
+        "ParameterKey": "ForgeClientId",
+        "ParameterValue": "override_this"
+    },
+    {
+        "ParameterKey":  "ForgeClientSecret",
+        "ParameterValue": "override_this"
+    },
+    {
+        "ParameterKey":  "PrivateSubnet1CIDR",
+        "ParameterValue": "10.0.0.0/19"
+    },
+    {
+        "ParameterKey":"PrivateSubnet2CIDR",
+        "ParameterValue": "10.0.32.0/19"
+    },
+    {
+        "ParameterKey": "PublicSubnet1CIDR",
+        "ParameterValue": "10.0.128.0/20"
+    },
+    {
+        "ParameterKey":"PublicSubnet2CIDR",
+        "ParameterValue": "10.0.144.0/20"
+    },
+    {
+        "ParameterKey":"QSS3BucketName",
+        "ParameterValue": "$[taskcat_autobucket]"
+    },
+    {
+        "ParameterKey": "QSS3KeyPrefix",
+        "ParameterValue": "quickstart-autodesk-forge/"
+    },
+    {
+        "ParameterKey": "RemoteAccessCIDR",
+        "ParameterValue": "10.0.0.0/16"
+    },
+    {
+        "ParameterKey": "VPCCIDR",
+        "ParameterValue": "10.0.0.0/16"
+    },
+    {
+        "ParameterKey": "ForgeNodeInstanceType",
+        "ParameterValue": "t2.micro"
+    },
+    {
+        "ParameterKey":"ForgeNodesDesiredCapacity",
+        "ParameterValue": "2"
+    },
+    {
+        "ParameterKey": "ForgeNodesMaxSize",
+        "ParameterValue": "4"
+    },
+    {
+        "ParameterKey":"ForgeNodesMinSize",
+        "ParameterValue": "2"
+    }
+]
