@@ -940,12 +940,41 @@
         }
     },
     "Outputs": {
-        "ELBDNSName": {
-            "Description": "ELB DNS Name",
+        "ALBDNSName": {
+            "Description": "ALB DNS Name",
             "Value": {
                 "Fn::GetAtt": [
                     "ApplicationLoadBalancer",
                     "DNSName"
+                ]
+            }
+        },
+        "ForgeAppURL": {
+            "Description": "Forge Application URL",
+            "Value": {
+                "Fn::Sub": [
+                    "${AppScheme}://${AppDomain}",
+                    {
+                        "AppScheme": {
+                            "Fn::If": [
+                                "UseALBSSL",
+                                "https",
+                                "http"
+                            ]
+                        },
+                        "AppDomain": {
+                            "Fn::If": [
+                                "ForgeSiteDomainRoute53Condition",
+                                {"Ref": "ForgeSiteDomain"},
+                                {
+                                    "Fn::GetAtt": [
+                                        "ApplicationLoadBalancer",
+                                        "DNSName"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
                 ]
             }
         }
