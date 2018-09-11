@@ -206,6 +206,7 @@
             ],
             "ConstraintDescription": "Must contain valid instance type",
             "Description": "Type of EC2 instance for the Workload instances",
+            "Default": "t2.large",
             "Type": "String"
         },
         "ForgeNodesDesiredCapacity": {
