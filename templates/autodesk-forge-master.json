@@ -609,5 +609,25 @@
                 }
             }
         }
+    },
+    "Outputs": {
+        "ALBDNSName": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "ForgeNodeJSStack",
+                    "Outputs.ALBDNSName"
+                ]
+            },
+            "Description": "ALB DNS Name"
+        },
+        "ForgeAppURL": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "ForgeNodeJSStack",
+                    "Outputs.ForgeAppURL"
+                ]
+            },
+            "Description": "Forge Application URL"
+        }
     }
 }
