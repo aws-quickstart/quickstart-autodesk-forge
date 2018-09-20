@@ -12,6 +12,18 @@
         "ParameterValue": "Amazon-Linux-HVM"
     },
     {
+        "ParameterKey": "ALBSSLCertificateARN",
+        "ParameterValue": "arn:aws:acm:us-east-2:169919375488:certificate/03030b54-81fd-44f7-ae14-76e50b0f7060"
+    },
+    {
+        "ParameterKey": "Route53HostedZoneId",
+        "ParameterValue": "ZD23YEWFQ5PZL"
+    },
+    {
+        "ParameterKey": "ForgeSiteDomain",
+        "ParameterValue": "forgeaws-jaime.com"
+    },
+    {
         "ParameterKey": "BastionInstanceType",
         "ParameterValue": "t2.micro"
     },

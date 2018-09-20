@@ -808,7 +808,7 @@
                                 "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1\n",
                                 "# update AWS cfn bootsrap\n",
                                 "# yum update -y aws-cfn-bootstrap\n",
-                                "curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -\n",
+                                "curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -\n",
                                 "yum -y install nodejs\n",
                                 "# install pm2 to restart node app\n",
                                 "npm i -g pm2@2.4.3\n",
