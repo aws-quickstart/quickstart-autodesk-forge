@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "This workload template deploys an ASG behind an ELB load balancer in two private subnets. The cluster is configured to use an S3 bucket for storage **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template. (qs-1oqea6241)",
+    "Description": "This template deploys Autodesk Forge in an ASG behind an ALB load balancer in two private subnets. **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template. (qs-1oqea6241)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
