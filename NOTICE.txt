@@ -1,6 +1,10 @@
 Copyright 2016-2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
-Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at
+Contents of the packages directory are licensed under the MIT License, the text of which is included in a "license" file in that directory and can also be obtained at
+
+    https://opensource.org/licenses/mit-license.php
+
+All other files in this repository are licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at
 
     http://aws.amazon.com/apache2.0/
 

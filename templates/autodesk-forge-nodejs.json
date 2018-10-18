@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "This workload template deploys an ASG behind an ELB load balancer in two private subnets. The cluster is configured to use an S3 bucket for storage **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template. (qs-1oqea6241)",
+    "Description": "This template deploys Autodesk Forge in an ASG behind an ALB load balancer in two private subnets. **WARNING** This template creates EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template. (qs-1oqea6241)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -13,24 +13,25 @@
                         "PrivateSubnet1ID",
                         "PrivateSubnet2ID",
                         "PublicSubnet1ID",
-                        "PublicSubnet2ID"
+                        "PublicSubnet2ID",
+                        "RemoteAccessCIDR"
                     ]
                 },
                 {
                     "Label": {
-                        "default": "Amazon EC2 Configuration"
+                        "default": "Security Configuration"
                     },
                     "Parameters": [
                         "KeyPairName",
-                        "BastionSecurityGroupID",
-                        "ForgeNodeInstanceType"
+                        "BastionSecurityGroupID"
                     ]
                 },
                 {
                     "Label": {
-                        "default": "Workload Nodes Configuration"
+                        "default": "Autodesk Forge Nodes Configuration"
                     },
                     "Parameters": [
+                        "ForgeNodeInstanceType",
                         "ForgeNodesMinSize",
                         "ForgeNodesMaxSize",
                         "ForgeNodesDesiredCapacity",
@@ -48,6 +49,16 @@
                 },
                 {
                     "Label": {
+                        "default": "[Optional] Forge Site Domain Configuration"
+                    },
+                    "Parameters": [
+                        "ForgeSiteDomain",
+                        "ALBSSLCertificateARN",
+                        "Route53HostedZoneId"
+                    ]
+                },
+                {
+                    "Label": {
                         "default": "AWS Quick Start Configuration"
                     },
                     "Parameters": [
@@ -61,7 +72,7 @@
                     "default": "Bastion Security Group ID"
                 },
                 "KeyPairName": {
-                    "default": "SSH Key Name"
+                    "default": "Key Pair Name"
                 },
                 "OperatorEmail": {
                     "default": "Operator Email"
@@ -94,16 +105,25 @@
                     "default": "VPC ID"
                 },
                 "ForgeNodeInstanceType": {
-                    "default": "Workload Servers Instance Type"
+                    "default": "Forge Nodes Instance Type"
                 },
                 "ForgeNodesDesiredCapacity": {
-                    "default": "Workload Nodes Desired Capacity"
+                    "default": "Forge Nodes Desired Capacity"
                 },
                 "ForgeNodesMaxSize": {
-                    "default": "Workload Nodes Max Size"
+                    "default": "Forge Nodes Max Size"
                 },
                 "ForgeNodesMinSize": {
-                    "default": "Workload Nodes Min Size"
+                    "default": "Forge Nodes Min Size"
+                },
+                "ForgeSiteDomain": {
+                    "default": "Forge Site Domain"
+                },
+                "ALBSSLCertificateARN": {
+                    "default": "ALB SSL Certificate ARN"
+                },
+                "Route53HostedZoneId": {
+                    "default": "Route 53 Hosted Zone Id"
                 }
             }
         }
@@ -111,54 +131,56 @@
     "Parameters": {
         "ALBSSLCertificateARN": {
             "Default": "",
-            "Description": "[Optional] The ARN of the SSL certificate to be used for the Application Load Balancer",
+            "Description": "[Optional] The ARN of the SSL certificate to be used for the Application Load Balancer.",
             "Type": "String"
         },
         "BastionSecurityGroupID": {
-            "Description": "ID of the bastion host security group to enable SSH connections (e.g., sg-7f16e910)",
+            "Description": "ID of the bastion host security group to enable SSH connections (e.g., sg-7f16e910).",
             "Type": "AWS::EC2::SecurityGroup::Id"
         },
         "KeyPairName": {
-            "Description": "Name of an existing EC2 key pair. All instances will launch with this key pair.",
+            "Description": "The name of an existing public/private key pair, which allows you to securely connect to your instance after it launches.",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "OperatorEmail": {
             "AllowedPattern": "([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)",
             "ConstraintDescription": "Must be a valid email address.",
-            "Description": "Email address that notifications of any scaling operations will be sent to",
+            "Description": "Email address that notifications of any scaling operations will be sent to.",
             "Type": "String"
         },
         "ForgeClientId": {
             "ConstraintDescription": "Input your Forge Client ID",
-            "Description": "Find your Client ID here https://developer.autodesk.com/myapps",
+            "Description": "Client ID of your Forge application. You can obtain it on the Forge Developer Platform at https://developer.autodesk.com/myapps.",
+            "NoEcho": "True",
             "Type": "String"
         },
         "ForgeClientSecret": {
             "ConstraintDescription": "Input your Forge Client Secret",
-            "Description": "Find your Client Secret here https://developer.autodesk.com/myapps",
+            "Description": "Client Secret of your Forge application. You can obtain it on the Forge Developer Platform at https://developer.autodesk.com/myapps.",
+            "NoEcho": "True",
             "Type": "String"
         },
         "PrivateSubnet1ID": {
-            "Description": "ID of private subnet 1 in Availability Zone 1 for the Workload (e.g., subnet-a0246dcd)",
+            "Description": "The ID of the private subnet in Availability Zone 1 in your existing VPC (e.g., subnet-a0246dcd).",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "PrivateSubnet2ID": {
-            "Description": "ID of private subnet 2 in Availability Zone 2 for the Workload (e.g., subnet-b1f432cd)",
+            "Description": "The ID of the private subnet in Availability Zone 2 in your existing VPC (e.g., subnet-b58c3d67).",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "PublicSubnet1ID": {
-            "Description": "ID of public subnet 1 in Availability Zone 1 for the ELB load balancer (e.g., subnet-9bc642ac)",
+            "Description": "The ID of the public subnet 1 in Availability Zone 1 in your existing VPC (e.g., subnet-9bc642ac)",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "PublicSubnet2ID": {
-            "Description": "ID of public subnet 2 in Availability Zone 2 for the ELB load balancer (e.g., subnet-e3246d8e)",
+            "Description": "The ID of the public subnet 1 in Availability Zone 2 in your existing VPC (e.g., subnet-e3246d8e)",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Default": "aws-quickstart",
-            "Description": "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
         "QSS3KeyPrefix": {
@@ -171,16 +193,16 @@
         "RemoteAccessCIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-            "Description": "The CIDR IP range that is permitted to access the bastions. We recommend that you set this value to a trusted IP range.",
+            "Description": "The CIDR IP range that is permitted to access the bastions and Forge web application. We recommend that you set this value to a trusted IP range.",
             "Type": "String"
         },
         "Route53HostedZoneId": {
-            "Description": "Route53 Hosted Zone ID",
+            "Description": "[Optional] Route53 Hosted Zone ID where DNS record for Forge Site Domain will be added.",
             "Type": "String",
             "Default": ""
         },
         "VPCID": {
-            "Description": "ID of your existing VPC for deployment",
+            "Description": "The ID of your existing VPC (e.g., vpc-0343606e).",
             "Type": "AWS::EC2::VPC::Id"
         },
         "ForgeNodeInstanceType": {
@@ -205,24 +227,27 @@
                 "m5.4xlarge"
             ],
             "ConstraintDescription": "Must contain valid instance type",
-            "Description": "Type of EC2 instance for the Workload instances",
             "Default": "t2.large",
+            "Description": "Amazon EC2 instance type for the Autodesk Forge instances.",
             "Type": "String"
         },
         "ForgeNodesDesiredCapacity": {
-            "Description": "The desired capacity for the Workload nodes Auto Scaling group",
+            "Default": "2",
+            "Description": "The desired capacity for Forge nodes in the Auto Scaling group.",
             "Type": "String"
         },
         "ForgeNodesMaxSize": {
-            "Description": "The maximum size of the Auto Scaling group",
+            "Default": "4",
+            "Description": "The maximum number of Forge nodes in the Auto Scaling group.",
             "Type": "String"
         },
         "ForgeNodesMinSize": {
-            "Description": "The minimum size of the Auto Scaling group",
+            "Default": "2",
+            "Description": "The minimum number of Forge nodes in the Auto Scaling group.",
             "Type": "String"
         },
         "ForgeSiteDomain": {
-            "Description": "Domain name of the site. e.g. example.com. Valid FQDN required when using SSL. Leave the default localhost.local for test environments.",
+            "Description": "[Optional] Domain name of the Forge site. e.g. example.com. Valid FQDN required when using SSL.",
             "AllowedPattern": "(?!-)[a-zA-Z0-9-.]*(?<!-)",
             "ConstraintDescription": "Must be a valid fully-qualified domain name.",
             "Type": "String",
