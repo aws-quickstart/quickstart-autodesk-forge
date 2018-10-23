@@ -72,7 +72,7 @@
                     "default": "Bastion Security Group ID"
                 },
                 "KeyPairName": {
-                    "default": "Key Pair name"
+                    "default": "Key pair name"
                 },
                 "OperatorEmail": {
                     "default": "Operator email"

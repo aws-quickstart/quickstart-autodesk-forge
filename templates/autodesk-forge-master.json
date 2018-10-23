@@ -80,7 +80,7 @@
                     "default": "Bastion instance type"
                 },
                 "KeyPairName": {
-                    "default": "Key Pair name"
+                    "default": "Key pair name"
                 },
                 "OperatorEmail": {
                     "default": "Operator email"
