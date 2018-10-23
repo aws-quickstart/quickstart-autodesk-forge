@@ -77,16 +77,16 @@
                     "default": "Bastion AMI Operating System"
                 },
                 "BastionInstanceType": {
-                    "default": "Bastion Instance Type"
+                    "default": "Bastion instance type"
                 },
                 "KeyPairName": {
-                    "default": "Key Pair Name"
+                    "default": "Key Pair name"
                 },
                 "OperatorEmail": {
-                    "default": "Operator Email"
+                    "default": "Operator email"
                 },
                 "ForgeClientId": {
-                    "default": "Forge Client Id"
+                    "default": "Forge Client ID"
                 },
                 "ForgeClientSecret": {
                     "default": "Forge Client Secret"
@@ -104,28 +104,28 @@
                     "default": "Public Subnet 2 CIDR"
                 },
                 "QSS3BucketName": {
-                    "default": "Quick Start S3 Bucket Name"
+                    "default": "Quick Start S3 bucket name"
                 },
                 "QSS3KeyPrefix": {
-                    "default": "Quick Start S3 Key Prefix"
+                    "default": "Quick Start S3 key prefix"
                 },
                 "RemoteAccessCIDR": {
-                    "default": "Allowed External Access CIDR"
+                    "default": "Allowed external access CIDR"
                 },
                 "VPCCIDR": {
                     "default": "VPC CIDR"
                 },
                 "ForgeNodeInstanceType": {
-                    "default": "Forge Nodes Instance Type"
+                    "default": "Forge Nodes instance type"
                 },
                 "ForgeNodesDesiredCapacity": {
-                    "default": "Forge Nodes Desired Capacity"
+                    "default": "Forge Nodes desired capacity"
                 },
                 "ForgeNodesMaxSize": {
-                    "default": "Forge Nodes Max Size"
+                    "default": "Forge Nodes max size"
                 },
                 "ForgeNodesMinSize": {
-                    "default": "Forge Nodes Min Size"
+                    "default": "Forge Nodes min size"
                 },
                 "ForgeSiteDomain": {
                     "default": "Forge Site Domain"
@@ -134,7 +134,7 @@
                     "default": "ALB SSL Certificate ARN"
                 },
                 "Route53HostedZoneId": {
-                    "default": "Route 53 Hosted Zone Id"
+                    "default": "Route 53 Hosted Zone ID"
                 }
             }
         }
