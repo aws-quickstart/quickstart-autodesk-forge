@@ -12,7 +12,7 @@ The AWS CloudFormation templates included with the Quick Start automate the foll
 
 You can also use the AWS CloudFormation templates as a starting point for your own implementation.
 
-![Quick Start architecture for Autodesk Forge on AWS Cloud](https://d1.awsstatic.com/partner-network/QuickStart/datasheets/autodesk-forge-architecture-on-aws.258e474b29054008a79b622999316e8bc45073d4.png)
+![Quick Start architecture for Autodesk Forge on AWS Cloud](https://d1.awsstatic.com/partner-network/QuickStart/datasheets/autodesk-forge-architecture-on-aws.5202484c31d52c3bd9df7beb19bbc7b0c357751e.png)
 
 For architectural details, best practices, step-by-step instructions, and customization options, see the [deployment guide](https://fwd.aws/RJEY8).
 
