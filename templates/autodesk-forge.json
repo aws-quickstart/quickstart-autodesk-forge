@@ -307,7 +307,7 @@
                 }
             ]
         },
-        "IsNodeJSApp": {
+        "UseNodeJSConfig": {
             "Fn::Equals": [
                 {
                     "Ref": "ForgeApplicationRuntime"
@@ -812,7 +812,7 @@
                         {
                             "ForgeLaunchConfigTemplate": {
                                 "Fn::If": [
-                                    "IsNodeJSApp",
+                                    "UseNodeJSConfig",
                                     "autodesk-forge-nodejs.json",
                                     "autodesk-forge-netcore.json"
                                 ]
