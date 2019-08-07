@@ -182,6 +182,15 @@
             "Description": "Email address that notifications of any scaling operations will be sent to.",
             "Type": "String"
         },
+        "ForgeApplicationRuntime": {
+            "AllowedValues": [
+                "Node.js",
+                ".NET Core"
+            ],
+            "Default": "Node.js",
+            "Description": "Define what kind of server side Autodesk Forge application you will be deploying",
+            "Type": "String"
+        },
         "ForgeClientId": {
             "ConstraintDescription": "Input your Forge Client ID",
             "Description": "Client ID of your Forge application. You can obtain it on the Forge Developer Platform at https://developer.autodesk.com/myapps.",
@@ -572,6 +581,9 @@
                     },
                     "OperatorEmail": {
                         "Ref": "OperatorEmail"
+                    },
+                    "ForgeApplicationRuntime": {
+                        "Ref": "ForgeApplicationRuntime"
                     },
                     "ForgeClientId": {
                         "Ref": "ForgeClientId"

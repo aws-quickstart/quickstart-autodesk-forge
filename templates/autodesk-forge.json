@@ -151,6 +151,15 @@
             "Description": "Email address that notifications of any scaling operations will be sent to.",
             "Type": "String"
         },
+        "ForgeApplicationRuntime": {
+            "AllowedValues": [
+                "Node.js",
+                ".NET Core"
+            ],
+            "Default": "Node.js",
+            "Description": "Define what kind of server side Autodesk Forge application you will be deploying",
+            "Type": "String"
+        },
         "ForgeClientId": {
             "ConstraintDescription": "Input your Forge Client ID",
             "Description": "Client ID of your Forge application. You can obtain it on the Forge Developer Platform at https://developer.autodesk.com/myapps.",
@@ -296,6 +305,14 @@
                         }
                     ]
                 }
+            ]
+        },
+        "IsNodeJSApp": {
+            "Fn::Equals": [
+                {
+                    "Ref": "ForgeApplicationRuntime"
+                },
+                "Node.js"
             ]
         }
     },
@@ -790,7 +807,18 @@
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/autodesk-forge-nodejs.json"
+                    "Fn::Sub": [
+                        "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/${ForgeLaunchConfigTemplate}",
+                        {
+                            "ForgeLaunchConfigTemplate": {
+                                "Fn::If": [
+                                    "IsNodeJSApp",
+                                    "autodesk-forge-nodejs.json",
+                                    "autodesk-forge-netcore.json"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 "Parameters": {
                     "ForgeNodeInstanceType": {
