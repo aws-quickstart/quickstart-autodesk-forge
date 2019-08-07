@@ -546,7 +546,7 @@
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/autodesk-forge-nodejs.json"
+                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/autodesk-forge.json"
                 },
                 "Parameters": {
                     "ForgeNodeInstanceType": {
