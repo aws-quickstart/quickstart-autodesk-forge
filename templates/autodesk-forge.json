@@ -40,6 +40,14 @@
                 },
                 {
                     "Label": {
+                        "default": "Autodesk Forge Application Runtime Language"
+                    },
+                    "Parameters": [
+                        "ForgeApplicationRuntime"
+                    ]
+                },
+                {
+                    "Label": {
                         "default": "Autodesk Forge Credentials"
                     },
                     "Parameters": [
@@ -76,6 +84,9 @@
                 },
                 "OperatorEmail": {
                     "default": "Operator email"
+                },
+                "ForgeApplicationRuntime": {
+                    "default": "Forge Server Side Language"
                 },
                 "ForgeClientId": {
                     "default": "Forge Client ID"
