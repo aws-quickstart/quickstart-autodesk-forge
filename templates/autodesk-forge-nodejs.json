@@ -191,13 +191,13 @@
                                 " >> /etc/profile\n",
                                 "source /etc/profile\n",
                                 {
-                                    "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/autodesk-forge-nodejs-aws.zip .\n"
+                                    "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/forge-viewmodels-nodejs-aws.zip .\n"
                                 },
-                                "unzip autodesk-forge-nodejs-aws.zip\n",
-                                "cd autodesk-forge-nodejs-aws\n",
+                                "unzip forge-viewmodels-nodejs-aws.zip\n",
+                                "cd forge-viewmodels-nodejs-aws\n",
                                 "pwd\n",
                                 "npm install\n",
-                                "pm2 start /autodesk-forge-nodejs-aws/start.js -i 0 --name forge-node-app\n",
+                                "pm2 start /forge-viewmodels-nodejs-aws/start.js -i 0 --name forge-node-app\n",
                                 "/opt/aws/bin/cfn-init --stack ",
                                 {
                                     "Ref": "AWS::StackName"
