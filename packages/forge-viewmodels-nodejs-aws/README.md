@@ -1,18 +1,20 @@
-# forge.tutorial.viewmodels.nodejs
+# forge-viewmodels-nodejs-aws
 
-[![Node.js](https://img.shields.io/badge/Node.js-4.4.3-blue.svg)](https://nodejs.org/)
-[![npm](https://img.shields.io/badge/npm-2.15.1-blue.svg)](https://www.npmjs.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-8.12.0-blue.svg)](https://nodejs.org/)
+[![npm](https://img.shields.io/badge/npm-6.4.1-blue.svg)](https://www.npmjs.com/)
 ![Platforms](https://img.shields.io/badge/platform-windows%20%7C%20osx%20%7C%20linux-lightgray.svg)
-[![License](http://img.shields.io/:license-mit-blue.svg)](http://opensource.org/licenses/MIT)
+[![License](http://img.shields.io/:license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
 [![oAuth2](https://img.shields.io/badge/oAuth2-v1-green.svg)](http://developer.autodesk.com/)
 [![Data-Management](https://img.shields.io/badge/Data%20Management-v1-green.svg)](http://developer.autodesk.com/)
-[![OSS](https://img.shields.io/badge/OSS-v2-green.svg)](http://developer.autodesk.com/)
-[![Model-Derivative](https://img.shields.io/badge/Model%20Derivative-v2-green.svg)](http://developer.autodesk.com/)
+[![Viewer](https://img.shields.io/badge/Viewer-v7-green.svg)](http://developer.autodesk.com/)
+
+![Intermediate](https://img.shields.io/badge/Level-Intermediate-blue.svg)
 
 # Description
 
-This sample is part of the [Learn Forge](http://learnforge.autodesk.io) tutorials.
+AWS Cloudformation Project
+
 
 # Setup
 
@@ -24,7 +26,7 @@ Install [NodeJS](https://nodejs.org).
 
 Clone this project or download it. It's recommended to install [GitHub desktop](https://desktop.github.com/). To clone it via command line, use the following (**Terminal** on MacOSX/Linux, **Git Shell** on Windows):
 
-    git clone https://github.com/autodesk-forge/forge.learning.viewmodels.nodejs
+    git clone https://github.com/autodesk-forge/autodesk.forge.aws.cloudformation.nodejs
 
 To run it, install the required packages, set the enviroment variables with your client ID & secret and finally start it. Via command line, navigate to the folder where this repository was cloned and use the following:
 
@@ -46,26 +48,17 @@ Open the browser: [http://localhost:3000](http://localhost:3000).
 
 ## Packages used
 
-The [Autodesk Forge](https://www.npmjs.com/package/forge-apis) packages is included by default. Some other non-Autodesk packaged are used, including [express](https://www.npmjs.com/package/express) and [multer](https://www.npmjs.com/package/multer) for upload.
+The [Autodesk Forge](https://www.npmjs.com/package/forge-apis) packages is included by default. 
 
-# Tips & tricks
+Some other non-Autodesk packaged are used: 
 
-For local development/testing, consider use [nodemon](https://www.npmjs.com/package/nodemon) package, which auto restart your node application after any modification on your code. To install it, use:
+[express](https://www.npmjs.com/package/express) for the server
 
-    sudo npm install -g nodemon
+[multer](https://www.npmjs.com/package/multer) for upload 
 
-Then, instead of **npm run dev**, use the following:
+[aws-sdk](https://www.npmjs.com/package/aws-sdk) for AWS services 
 
-    npm run nodemon
-
-Which executes **nodemon server.js --ignore www/**, where the **--ignore** parameter indicates that the app should not restart if files under **www** folder are modified.
-
-## Troubleshooting
-
-After installing Github desktop for Windows, on the Git Shell, if you see a ***error setting certificate verify locations*** error, use the following:
-
-    git config --global http.sslverify "false"
-
+[aws-param-store](https://www.npmjs.com/package/aws-param-store) for access to AWS SSM Parameter Store.
 # License
 
 This sample is licensed under the terms of the [MIT License](http://opensource.org/licenses/MIT).
@@ -73,4 +66,4 @@ Please see the [LICENSE](LICENSE) file for full details.
 
 ## Written by
 
-Augusto Goncalves [@augustomaia](https://twitter.com/augustomaia), [Forge Partner Development](http://forge.autodesk.com)
+[Forge Partner Development](http://forge.autodesk.com)

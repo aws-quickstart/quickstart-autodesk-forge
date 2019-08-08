@@ -20,8 +20,8 @@ const path = require('path');
 const express = require('express');
 
 const PORT = process.env.PORT || 3000;
-const configAWS = require('./configAWS');
-if (configAWS.forgeAWSClientId == null || configAWS.forgeAWSClientSecret == null) {
+const config = require('./config');
+if (config.forgeAWSClientId == null || config.forgeAWSClientSecret == null) {
     console.error('Missing FORGE_CLIENT_ID or FORGE_CLIENT_SECRET env. variables.');
     return;
 }
