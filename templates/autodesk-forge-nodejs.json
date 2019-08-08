@@ -179,12 +179,12 @@
                                     "Ref": "AWS::Region"
                                 },
                                 " >> /etc/profile\n",
-                                "echo export FORGE_CLIENT_ID_PARAM=",
+                                "echo export FORGE_CLIENT_ID=",
                                 {
                                     "Ref": "ForgeClientIdSSMParameter"
                                 },
                                 " >> /etc/profile\n",
-                                "echo export FORGE_CLIENT_SECRET_PARAM=",
+                                "echo export FORGE_CLIENT_SECRET=",
                                 {
                                     "Ref": "ForgeClientSecretSSMParameter"
                                 },
