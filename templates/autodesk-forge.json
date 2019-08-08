@@ -848,7 +848,7 @@
                         "Ref": "WorkloadSecurityGroup"
                     },
                     "SetupRoleProfile": {
-                        "Ref": "RemoteAccessCIDR"
+                        "Ref": "SetupRoleProfile"
                     },
                     "QSS3BucketName": {
                         "Ref": "QSS3BucketName"
