@@ -895,7 +895,7 @@
                 "LaunchConfigurationName": {
                     "Fn::GetAtt": [
                         "WorkloadASLaunchConfig",
-                        "Outputs.PrivateSubnet2AID"
+                        "Outputs.WorkloadASLaunchConfig"
                     ]
                 },
                 "TargetGroupARNs": [
