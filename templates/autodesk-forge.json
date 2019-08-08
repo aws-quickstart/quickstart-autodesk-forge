@@ -839,13 +839,13 @@
                         "Ref": "KeyPairName"
                     },
                     "ForgeClientIdSSMParameter": {
-                        "Ref": "OperatorEmail"
+                        "Ref": "ForgeClientIdSSMParameter"
                     },
                     "ForgeClientSecretSSMParameter": {
-                        "Ref": "ForgeClientId"
+                        "Ref": "ForgeClientSecretSSMParameter"
                     },
                     "WorkloadSecurityGroup": {
-                        "Ref": "ForgeClientSecret"
+                        "Ref": "WorkloadSecurityGroup"
                     },
                     "SetupRoleProfile": {
                         "Ref": "RemoteAccessCIDR"
