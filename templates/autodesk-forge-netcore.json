@@ -1,0 +1,229 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "This template deploys Autodesk Forge Auto Scaling launch configuration for .NetCore runtime.",
+    "Parameters": {
+        "KeyPairName": {
+            "Description": "The name of an existing public/private key pair, which allows you to securely connect to your instance after it launches.",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "ForgeNodeInstanceType": {
+            "AllowedValues": [
+                "t2.nano",
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "t2.xlarge",
+                "t2.2xlarge",
+                "t3.nano",
+                "t3.micro",
+                "t3.small",
+                "t3.medium",
+                "t3.large",
+                "t3.xlarge",
+                "t3.2xlarge",
+                "m5.large",
+                "m5.xlarge",
+                "m5.2xlarge",
+                "m5.4xlarge"
+            ],
+            "ConstraintDescription": "Must contain valid instance type",
+            "Default": "t2.large",
+            "Description": "Amazon EC2 instance type for the Autodesk Forge instances.",
+            "Type": "String"
+        },
+        "ForgeClientIdSSMParameter": {
+            "Description": "Forge Client ID SSM parameter",
+            "Type": "AWS::SSM::Parameter::Name"
+        },
+        "ForgeClientSecretSSMParameter": {
+            "Description": "Forge Client Secret SSM parameter",
+            "Type": "AWS::SSM::Parameter::Name"
+        },
+        "WorkloadSecurityGroup": {
+            "Description": "ID of the Forge workload security group (e.g., sg-7f16e910).",
+            "Type": "AWS::EC2::SecurityGroup::Id"
+        },
+        "SetupRoleProfile": {
+            "Description": "Name of the instance profile applied to Forge instances",
+            "Type": "String"
+        },
+        "ParentStack": {
+            "Description": "Name of the parent stack",
+            "Type": "String"
+        },
+        "QSS3BucketName": {
+            "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
+            "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Default": "aws-quickstart",
+            "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Type": "String"
+        },
+        "QSS3KeyPrefix": {
+            "AllowedPattern": "^[0-9a-zA-Z-/]*$",
+            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
+            "Default": "quickstart-autodesk-forge/",
+            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
+            "Type": "String"
+        }
+    },
+    "Mappings": {
+        "AWSAMIRegionMap": {
+            "AMI": {
+                "AMZNLINUXHVM": "amzn-ami-hvm-2018.03.0.20190611-x86_64-gp2"
+            },
+            "ap-northeast-1": {
+                "AMZNLINUXHVM": "ami-04b2d1589ab1d972c"
+            },
+            "ap-northeast-2": {
+                "AMZNLINUXHVM": "ami-0be3e6f84d3b968cd"
+            },
+            "ap-northeast-3": {
+                "AMZNLINUXHVM": "ami-0cc7fccf25a84eb7d"
+            },
+            "ap-south-1": {
+                "AMZNLINUXHVM": "ami-0b99c7725b9484f9e"
+            },
+            "ap-southeast-1": {
+                "AMZNLINUXHVM": "ami-0fb6b6f9e81056553"
+            },
+            "ap-southeast-2": {
+                "AMZNLINUXHVM": "ami-075caa3491def750b"
+            },
+            "ca-central-1": {
+                "AMZNLINUXHVM": "ami-0a67d15f2858e33cb"
+            },
+            "eu-central-1": {
+                "AMZNLINUXHVM": "ami-026d3b3672c6e7b66"
+            },
+            "eu-west-1": {
+                "AMZNLINUXHVM": "ami-0862aabda3fb488b5"
+            },
+            "eu-west-2": {
+                "AMZNLINUXHVM": "ami-0bdfa1adc3878cd23"
+            },
+            "eu-west-3": {
+                "AMZNLINUXHVM": "ami-05b93cd5a1b552734"
+            },
+            "sa-east-1": {
+                "AMZNLINUXHVM": "ami-0bb96001cf2299257"
+            },
+            "us-east-1": {
+                "AMZNLINUXHVM": "ami-035b3c7efe6d061d5"
+            },
+            "us-east-2": {
+                "AMZNLINUXHVM": "ami-02f706d959cedf892"
+            },
+            "us-west-1": {
+                "AMZNLINUXHVM": "ami-0fcdcdb074d2bac5f"
+            },
+            "us-west-2": {
+                "AMZNLINUXHVM": "ami-0f2176987ee50226e"
+            }
+        }
+    },
+    "Resources": {
+        "WorkloadASLaunchConfig": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "configSets": {
+                        "quickstart": [
+                            "install",
+                            "configure",
+                            "cleanup"
+                        ]
+                    },
+                    "install": {},
+                    "configure": {},
+                    "cleanup": {}
+                }
+            },
+            "Properties": {
+                "KeyName": {
+                    "Ref": "KeyPairName"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "AMZNLINUXHVM"
+                    ]
+                },
+                "InstanceMonitoring": "true",
+                "IamInstanceProfile": {
+                    "Ref": "SetupRoleProfile"
+                },
+                "InstanceType": {
+                    "Ref": "ForgeNodeInstanceType"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "WorkloadSecurityGroup"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -ex\n",
+                                "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1\n",
+                                "# update AWS cfn bootsrap\n",
+                                "# yum update -y aws-cfn-bootstrap\n",
+                                "yum -y update\n",
+                                "rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm\n",
+                                "# install netcore sdk 2.2\n",
+                                "yum install -y dotnet-sdk-2.2\n",                          
+                                "echo export AWS_REGION=",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                " >> /etc/profile\n",
+                                "echo export FORGE_CLIENT_ID=",
+                                {
+                                    "Ref": "ForgeClientIdSSMParameter"
+                                },
+                                " >> /etc/profile\n",
+                                "echo export FORGE_CLIENT_SECRET=",
+                                {
+                                    "Ref": "ForgeClientSecretSSMParameter"
+                                },
+                                " >> /etc/profile\n",
+                                "source /etc/profile\n",
+                                {
+                                    "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/forge-viewmodels-netcore-aws.zip .\n"
+                                },
+                                "unzip forge-viewmodels-netcore-aws.zip\n",
+                                "cd forge-viewmodels-netcore-aws\n",
+                                "dotnet build\n",
+                                "dotnet run\n",
+                                "\n",
+                                "# Signal the status from cfn-init\n",
+                                "/opt/aws/bin/cfn-signal -e $? --stack ",
+                                {
+                                    "Ref": "ParentStack"
+                                },
+                                " --resource WorkloadAutoScalingGroup --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "WorkloadASLaunchConfig": {
+            "Description": "Forge Server Auto Scaling launch configuration",
+            "Value": {
+                "Ref": "WorkloadASLaunchConfig"
+            }
+        }
+    }
+}
