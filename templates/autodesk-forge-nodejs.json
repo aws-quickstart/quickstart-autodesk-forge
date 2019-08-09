@@ -201,7 +201,7 @@
                                 "cd forge-viewmodels-nodejs-aws\n",
                                 "pwd\n",
                                 "npm install\n",
-                                "pm2 start /autodesk-forge-nodejs-aws/start.js -i 0 --name forge-node-app\n",
+                                "pm2 start /forge-viewmodels-nodejs-aws/start.js -i 0 --name forge-node-app\n",
                                 "\n",
                                 "# Signal the status from cfn-init\n",
                                 "/opt/aws/bin/cfn-signal -e $? --stack ",
