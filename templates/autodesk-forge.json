@@ -814,7 +814,7 @@
                 ]
             }
         },
-        "WorkloadASLaunchConfig": {
+        "WorkloadASLaunchConfigStack": {
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
@@ -849,6 +849,9 @@
                     },
                     "SetupRoleProfile": {
                         "Ref": "SetupRoleProfile"
+                    },
+                    "ParentStack": {
+                        "Ref": "AWS::StackName"
                     },
                     "QSS3BucketName": {
                         "Ref": "QSS3BucketName"
@@ -894,7 +897,7 @@
                 "HealthCheckType": "EC2",
                 "LaunchConfigurationName": {
                     "Fn::GetAtt": [
-                        "WorkloadASLaunchConfig",
+                        "WorkloadASLaunchConfigStack",
                         "Outputs.WorkloadASLaunchConfig"
                     ]
                 },

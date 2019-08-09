@@ -48,6 +48,10 @@
             "Description": "Name of the instance profile applied to Forge instances",
             "Type": "String"
         },
+        "ParentStack": {
+            "Description": "Name of the parent stack",
+            "Type": "String"
+        },
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
@@ -198,19 +202,11 @@
                                 "pwd\n",
                                 "npm install\n",
                                 "pm2 start /autodesk-forge-nodejs-aws/start.js -i 0 --name forge-node-app\n",
-                                "/opt/aws/bin/cfn-init --stack ",
-                                {
-                                    "Ref": "AWS::StackName"
-                                },
-                                " --resource WorkloadASLaunchConfig --configsets quickstart --region ",
-                                {
-                                    "Ref": "AWS::Region"
-                                },
                                 "\n",
                                 "# Signal the status from cfn-init\n",
                                 "/opt/aws/bin/cfn-signal -e $? --stack ",
                                 {
-                                    "Ref": "AWS::StackName"
+                                    "Ref": "ParentStack"
                                 },
                                 " --resource WorkloadAutoScalingGroup --region ",
                                 {
