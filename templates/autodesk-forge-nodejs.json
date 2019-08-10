@@ -40,6 +40,10 @@
             "Description": "Forge Client Secret SSM parameter",
             "Type": "AWS::SSM::Parameter::Name"
         },
+        "LatestAmazonLinux2Id": {
+            "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+            "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+        },
         "WorkloadSecurityGroup": {
             "Description": "ID of the Forge workload security group (e.g., sg-7f16e910).",
             "Type": "AWS::EC2::SecurityGroup::Id"
@@ -67,61 +71,6 @@
             "Type": "String"
         }
     },
-    "Mappings": {
-        "AWSAMIRegionMap": {
-            "AMI": {
-                "AMZNLINUXHVM": "amzn-ami-hvm-2018.03.0.20190611-x86_64-gp2"
-            },
-            "ap-northeast-1": {
-                "AMZNLINUXHVM": "ami-04b2d1589ab1d972c"
-            },
-            "ap-northeast-2": {
-                "AMZNLINUXHVM": "ami-0be3e6f84d3b968cd"
-            },
-            "ap-northeast-3": {
-                "AMZNLINUXHVM": "ami-0cc7fccf25a84eb7d"
-            },
-            "ap-south-1": {
-                "AMZNLINUXHVM": "ami-0b99c7725b9484f9e"
-            },
-            "ap-southeast-1": {
-                "AMZNLINUXHVM": "ami-0fb6b6f9e81056553"
-            },
-            "ap-southeast-2": {
-                "AMZNLINUXHVM": "ami-075caa3491def750b"
-            },
-            "ca-central-1": {
-                "AMZNLINUXHVM": "ami-0a67d15f2858e33cb"
-            },
-            "eu-central-1": {
-                "AMZNLINUXHVM": "ami-026d3b3672c6e7b66"
-            },
-            "eu-west-1": {
-                "AMZNLINUXHVM": "ami-0862aabda3fb488b5"
-            },
-            "eu-west-2": {
-                "AMZNLINUXHVM": "ami-0bdfa1adc3878cd23"
-            },
-            "eu-west-3": {
-                "AMZNLINUXHVM": "ami-05b93cd5a1b552734"
-            },
-            "sa-east-1": {
-                "AMZNLINUXHVM": "ami-0bb96001cf2299257"
-            },
-            "us-east-1": {
-                "AMZNLINUXHVM": "ami-035b3c7efe6d061d5"
-            },
-            "us-east-2": {
-                "AMZNLINUXHVM": "ami-02f706d959cedf892"
-            },
-            "us-west-1": {
-                "AMZNLINUXHVM": "ami-0fcdcdb074d2bac5f"
-            },
-            "us-west-2": {
-                "AMZNLINUXHVM": "ami-0f2176987ee50226e"
-            }
-        }
-    },
     "Resources": {
         "WorkloadASLaunchConfig": {
             "Type": "AWS::AutoScaling::LaunchConfiguration",
@@ -144,13 +93,7 @@
                     "Ref": "KeyPairName"
                 },
                 "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        "AMZNLINUXHVM"
-                    ]
+                    "Ref": "LatestAmazonLinux2Id"
                 },
                 "InstanceMonitoring": "true",
                 "IamInstanceProfile": {
