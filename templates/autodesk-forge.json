@@ -872,7 +872,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "Autodesk Forge NodeJS Instance",
+                        "Value": "Autodesk Forge Instance",
                         "PropagateAtLaunch": "true"
                     }
                 ]
