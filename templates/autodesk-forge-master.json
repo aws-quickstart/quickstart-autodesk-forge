@@ -561,7 +561,7 @@
                 }
             }
         },
-        "ForgeNodeJSStack": {
+        "ForgeStack": {
             "DependsOn": "BastionStack",
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
@@ -658,7 +658,7 @@
         "ALBDNSName": {
             "Value": {
                 "Fn::GetAtt": [
-                    "ForgeNodeJSStack",
+                    "ForgeStack",
                     "Outputs.ALBDNSName"
                 ]
             },
@@ -667,7 +667,7 @@
         "ForgeAppURL": {
             "Value": {
                 "Fn::GetAtt": [
-                    "ForgeNodeJSStack",
+                    "ForgeStack",
                     "Outputs.ForgeAppURL"
                 ]
             },
