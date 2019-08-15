@@ -145,9 +145,9 @@
                                 "sed -i \"s/ID_TOKEN/$FORGE_CLIENT_ID/g\" launchSettings.json\n",
                                 "sed -i \"s/REGION_TOKEN/$AWS_REGION/g\" launchSettings.json\n",
                                 "cd ..\n",
+                                "export DOTNET_CLI_HOME=`pwd`\n",
                                 "dotnet build\n",
                                 "nohup dotnet run > application.log 2>&1 &\n",
-                                "\n",
                                 "# Signal the status from cfn-init\n",
                                 "/opt/aws/bin/cfn-signal -e $? --stack ",
                                 {
