@@ -6,7 +6,7 @@
             "ParameterGroups": [
                 {
                     "Label": {
-                        "default": "Network Configuration"
+                        "default": "VPC network configuration"
                     },
                     "Parameters": [
                         "AvailabilityZones",
@@ -20,7 +20,7 @@
                 },
                 {
                     "Label": {
-                        "default": "Bastion Host Configuration"
+                        "default": "Bastion host configuration"
                     },
                     "Parameters": [
                         "KeyPairName",
@@ -30,7 +30,7 @@
                 },
                 {
                     "Label": {
-                        "default": "Autodesk Forge Nodes Configuration"
+                        "default": "Autodesk Forge nodes configuration"
                     },
                     "Parameters": [
                         "ForgeNodeInstanceType",
@@ -42,7 +42,7 @@
                 },
                 {
                     "Label": {
-                        "default": "Autodesk Forge Application Runtime Language"
+                        "default": "Autodesk Forge application runtime language"
                     },
                     "Parameters": [
                         "ForgeApplicationRuntime"
@@ -50,7 +50,7 @@
                 },
                 {
                     "Label": {
-                        "default": "Autodesk Forge Credentials"
+                        "default": "Autodesk Forge credentials"
                     },
                     "Parameters": [
                         "ForgeClientId",
@@ -59,7 +59,7 @@
                 },
                 {
                     "Label": {
-                        "default": "[Optional] Forge Site Domain Configuration"
+                        "default": "[Optional] Forge site domain configuration"
                     },
                     "Parameters": [
                         "ForgeSiteDomain",
@@ -69,7 +69,7 @@
                 },
                 {
                     "Label": {
-                        "default": "AWS Quick Start Configuration"
+                        "default": "AWS Quick Start configuration"
                     },
                     "Parameters": [
                         "QSS3BucketName",
@@ -82,7 +82,7 @@
                     "default": "Availability Zones"
                 },
                 "BastionAMIOS": {
-                    "default": "Bastion AMI Operating System"
+                    "default": "Bastion AMI operating system"
                 },
                 "BastionInstanceType": {
                     "default": "Bastion instance type"
@@ -94,25 +94,25 @@
                     "default": "Operator email"
                 },
                 "ForgeApplicationRuntime": {
-                    "default": "Forge Server Side Language"
+                    "default": "Forge application runtime"
                 },
                 "ForgeClientId": {
-                    "default": "Forge Client ID"
+                    "default": "Forge client ID"
                 },
                 "ForgeClientSecret": {
-                    "default": "Forge Client Secret"
+                    "default": "Forge client secret"
                 },
                 "PrivateSubnet1CIDR": {
-                    "default": "Private Subnet 1 CIDR"
+                    "default": "Private subnet 1 CIDR"
                 },
                 "PrivateSubnet2CIDR": {
-                    "default": "Private Subnet 2 CIDR"
+                    "default": "Private subnet 2 CIDR"
                 },
                 "PublicSubnet1CIDR": {
-                    "default": "Public Subnet 1 CIDR"
+                    "default": "Public subnet 1 CIDR"
                 },
                 "PublicSubnet2CIDR": {
-                    "default": "Public Subnet 2 CIDR"
+                    "default": "Public subnet 2 CIDR"
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 bucket name"
@@ -127,25 +127,25 @@
                     "default": "VPC CIDR"
                 },
                 "ForgeNodeInstanceType": {
-                    "default": "Forge Nodes instance type"
+                    "default": "Forge nodes instance type"
                 },
                 "ForgeNodesDesiredCapacity": {
-                    "default": "Forge Nodes desired capacity"
+                    "default": "Forge nodes desired capacity"
                 },
                 "ForgeNodesMaxSize": {
-                    "default": "Forge Nodes max size"
+                    "default": "Forge nodes max size"
                 },
                 "ForgeNodesMinSize": {
-                    "default": "Forge Nodes min size"
+                    "default": "Forge nodes min size"
                 },
                 "ForgeSiteDomain": {
-                    "default": "Forge Site Domain"
+                    "default": "Forge site domain"
                 },
                 "ALBSSLCertificateARN": {
-                    "default": "ALB SSL Certificate ARN"
+                    "default": "ALB SSL certificate ARN"
                 },
                 "Route53HostedZoneId": {
-                    "default": "Route 53 Hosted Zone ID"
+                    "default": "Route 53 hosted zone ID"
                 }
             }
         }
