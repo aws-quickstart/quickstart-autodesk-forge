@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "This template deploys Autodesk Forge Auto Scaling launch configuration for Node.js runtime.",
+    "Description": "This template deploys Autodesk Forge Auto Scaling launch configuration for .NetCore runtime.",
     "Parameters": {
         "KeyPairName": {
             "Description": "The name of an existing public/private key pair, which allows you to securely connect to your instance after it launches.",
@@ -116,11 +116,10 @@
                                 "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1\n",
                                 "# update AWS cfn bootsrap\n",
                                 "# yum update -y aws-cfn-bootstrap\n",
-                                "curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -\n",
-                                "yum -y install nodejs\n",
-                                "# install pm2 to restart node app\n",
-                                "npm i -g pm2@2.4.3\n",
-                                "echo export FORGE_AWS_FLAG=1 >> /etc/profile\n",
+                                "yum -y update\n",
+                                "rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm\n",
+                                "# install netcore sdk 2.2\n",
+                                "yum install -y dotnet-sdk-2.2\n",                          
                                 "echo export AWS_REGION=",
                                 {
                                     "Ref": "AWS::Region"
@@ -138,14 +137,17 @@
                                 " >> /etc/profile\n",
                                 "source /etc/profile\n",
                                 {
-                                    "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/forge-viewmodels-nodejs-aws.zip .\n"
+                                    "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/forge-viewmodels-netcore-aws.zip .\n"
                                 },
-                                "unzip forge-viewmodels-nodejs-aws.zip\n",
-                                "cd forge-viewmodels-nodejs-aws\n",
-                                "pwd\n",
-                                "npm install\n",
-                                "pm2 start /forge-viewmodels-nodejs-aws/start.js -i 0 --name forge-node-app\n",
-                                "\n",
+                                "unzip forge-viewmodels-netcore-aws.zip\n",
+                                "cd forge-viewmodels-netcore-aws/Properties\n",
+                                "sed -i \"s/SECRET_TOKEN/$FORGE_CLIENT_SECRET/g\" launchSettings.json\n",
+                                "sed -i \"s/ID_TOKEN/$FORGE_CLIENT_ID/g\" launchSettings.json\n",
+                                "sed -i \"s/REGION_TOKEN/$AWS_REGION/g\" launchSettings.json\n",
+                                "cd ..\n",
+                                "export DOTNET_CLI_HOME=`pwd`\n",
+                                "dotnet build\n",
+                                "nohup dotnet run > application.log 2>&1 &\n",
                                 "# Signal the status from cfn-init\n",
                                 "/opt/aws/bin/cfn-signal -e $? --stack ",
                                 {

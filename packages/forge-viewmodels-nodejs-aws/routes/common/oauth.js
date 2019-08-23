@@ -18,7 +18,11 @@
 
 const { AuthClientTwoLegged } = require('forge-apis');
 
-const configAWS = require('../../configAWS');
+const config = require('../../config');
+
+let client_id = null;
+
+let client_secret = null;
 
 /**
  * Initializes a Forge client for 2-legged authentication.
@@ -26,9 +30,13 @@ const configAWS = require('../../configAWS');
  * @returns {AuthClientTwoLegged} 2-legged authentication client.
  */
 async function getClient(scopes) {
-    const client_id = await configAWS.forgeAWSClientId();
-    const client_secret = await configAWS.forgeAWSClientSecret();
-    return new AuthClientTwoLegged(client_id, client_secret, scopes || configAWS.scopeInternal);
+    if (!client_id || !client_secret){
+        let result = await Promise.all([config.forgeAWSClientId(), config.forgeAWSClientSecret()]);
+        client_id = result[0];
+        client_secret = result[1];
+    }
+    
+    return new AuthClientTwoLegged(client_id, client_secret, scopes || config.scopeInternal);
 }
 
 let cache = {};
@@ -49,7 +57,7 @@ async function getToken(scopes) {
  * @returns Token object: { "access_token": "...", "expires_at": "...", "expires_in": "...", "token_type": "..." }.
  */
 async function getPublicToken() {
-    return getToken(configAWS.scopePublic);
+    return getToken(config.scopePublic);
 }
 
 /**
@@ -57,7 +65,7 @@ async function getPublicToken() {
  * @returns Token object: { "access_token": "...", "expires_at": "...", "expires_in": "...", "token_type": "..." }.
  */
 async function getInternalToken() {
-    return getToken(configAWS.scopeInternal);
+    return getToken(config.scopeInternal);
 }
 
 module.exports = {

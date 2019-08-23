@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Autodesk.Forge" Version="1.5.2" />
+    <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.3.103.2" />
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Amazon.Extensions.Configuration.SystemsManager" Version="1.1.1" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.3.100.1" />
+  </ItemGroup>
+</Project>

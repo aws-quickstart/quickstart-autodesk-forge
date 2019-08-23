@@ -21,8 +21,8 @@ const awsParamStore = require( 'aws-param-store' );
 const awsFlag = process.env.FORGE_AWS_FLAG;
 const paramStore = {"region": process.env.AWS_REGION}
 
-const clientIdParam = process.env.FORGE_CLIENT_ID_PARAM;
-const clientSecretParam = process.env.FORGE_CLIENT_SECRET_PARAM;
+const clientId = process.env.FORGE_CLIENT_ID;
+const clientSecret = process.env.FORGE_CLIENT_SECRET;
 
 // Autodesk Forge AWS configuration for SSM service
 module.exports = {
@@ -47,12 +47,12 @@ module.exports = {
     },
     
     forgeAWSClientId: async function() {
-        let parameter = await awsParamStore.getParameterSync( clientIdParam , this.getParamStore());
+        let parameter = await awsParamStore.getParameter( clientId , this.getParamStore());
         return parameter.Value;
     },
 
     forgeAWSClientSecret: async function() {
-        let parameter = await awsParamStore.getParameterSync( clientSecretParam ,this.getParamStore());
+        let parameter = await awsParamStore.getParameter( clientSecret ,this.getParamStore());
         return parameter.Value;
     }
 };

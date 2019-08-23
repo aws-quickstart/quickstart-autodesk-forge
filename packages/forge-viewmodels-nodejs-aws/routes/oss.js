@@ -22,6 +22,7 @@ const multer  = require('multer');
 const { BucketsApi, ObjectsApi, PostBucketsPayload } = require('forge-apis');
 
 const { getClient, getInternalToken } = require('./common/oauth');
+const config = require('../config');
 
 let router = express.Router();
 
@@ -40,11 +41,13 @@ router.get('/buckets', async (req, res, next) => {
     if (!bucket_name || bucket_name === '#') {
         try {
             // Retrieve buckets from Forge using the [BucketsApi](https://github.com/Autodesk-Forge/forge-api-nodejs-client/blob/master/docs/BucketsApi.md#getBuckets)
+            const client_id = await config.forgeAWSClientId();
             const buckets = await new BucketsApi().getBuckets({ limit: 64 }, req.oauth_client, req.oauth_token);
             res.json(buckets.body.items.map((bucket) => {
                 return {
                     id: bucket.bucketKey,
-                    text: bucket.bucketKey,
+                    // Remove bucket key prefix that was added during bucket creation
+                    text: bucket.bucketKey.replace(client_id.toLowerCase() + '-', ''),
                     type: 'bucket',
                     children: true
                 };
@@ -73,8 +76,9 @@ router.get('/buckets', async (req, res, next) => {
 // POST /api/forge/oss/buckets - creates a new bucket.
 // Request body must be a valid JSON in the form of { "bucketKey": "<new_bucket_name>" }.
 router.post('/buckets', async (req, res, next) => {
+    const client_id = await config.forgeAWSClientId();
     let payload = new PostBucketsPayload();
-    payload.bucketKey = req.body.bucketKey;
+    payload.bucketKey = client_id.toLowerCase() + '-' + req.body.bucketKey;
     payload.policyKey = 'transient'; // expires in 24h
     try {
         // Create a bucket using [BucketsApi](https://github.com/Autodesk-Forge/forge-api-nodejs-client/blob/master/docs/BucketsApi.md#createBucket).
