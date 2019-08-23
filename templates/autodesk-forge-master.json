@@ -42,7 +42,7 @@
                 },
                 {
                     "Label": {
-                        "default": "Autodesk Forge application runtime language"
+                        "default": "Autodesk Forge application runtime configuration"
                     },
                     "Parameters": [
                         "ForgeApplicationRuntime"
