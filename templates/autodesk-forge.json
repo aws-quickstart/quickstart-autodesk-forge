@@ -168,7 +168,7 @@
                 ".NET Core"
             ],
             "Default": "Node.js",
-            "Description": "Define what kind of server side Autodesk Forge application you will be deploying",
+            "Description": "The runtime environment of the Autodesk Forge application.",
             "Type": "String"
         },
         "ForgeClientId": {
