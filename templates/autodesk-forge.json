@@ -884,6 +884,20 @@
                     },
                     "Timeout": "PT2H"
                 }
+            },
+            "UpdatePolicy":{
+                "AutoScalingRollingUpdate":{
+                    "MinInstancesInService":"1",
+                    "MaxBatchSize":"1",
+                    "PauseTime":"PT1M",
+                    "SuspendProcesses":[
+                        "HealthCheck",
+                        "ReplaceUnhealthy",
+                        "AZRebalance",
+                        "AlarmNotification",
+                        "ScheduledActions"
+                    ]
+                }
             }
         }
     },
