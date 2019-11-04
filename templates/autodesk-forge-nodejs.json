@@ -138,13 +138,13 @@
                                 " >> /etc/profile\n",
                                 "source /etc/profile\n",
                                 {
-                                    "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/forge-viewmodels-nodejs-aws.zip .\n"
+                                    "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/forge-viewmodels-nodejs-aws-dashboard.zip .\n"
                                 },
-                                "unzip forge-viewmodels-nodejs-aws.zip\n",
-                                "cd forge-viewmodels-nodejs-aws\n",
+                                "unzip forge-viewmodels-nodejs-aws-dashboard.zip\n",
+                                "cd forge-viewmodels-nodejs-aws-dashboard\n",
                                 "pwd\n",
                                 "npm install\n",
-                                "pm2 start /forge-viewmodels-nodejs-aws/start.js -i 0 --name forge-node-app\n",
+                                "pm2 start /forge-viewmodels-nodejs-aws-dashboard/start.js -i 0 --name forge-node-app\n",
                                 "\n",
                                 "# Signal the status from cfn-init\n",
                                 "/opt/aws/bin/cfn-signal -e $? --stack ",
