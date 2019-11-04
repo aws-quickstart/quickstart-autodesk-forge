@@ -92,7 +92,7 @@
                     "default": "Forge client ID"
                 },
                 "ForgeClientSecret": {
-                    "default": "Forge client Secret"
+                    "default": "Forge client secret"
                 },
                 "PrivateSubnet1ID": {
                     "default": "Private subnet 1 ID"
