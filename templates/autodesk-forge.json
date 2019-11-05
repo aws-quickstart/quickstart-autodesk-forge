@@ -798,6 +798,7 @@
                     "ParentStack": {
                         "Ref": "AWS::StackName"
                     },
+                    "Toggle": "true",
                     "QSS3BucketName": {
                         "Ref": "QSS3BucketName"
                     },
@@ -872,7 +873,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "Autodesk Forge Instance with dashboard app",
+                        "Value": "Autodesk Forge Instance",
                         "PropagateAtLaunch": "true"
                     }
                 ]
