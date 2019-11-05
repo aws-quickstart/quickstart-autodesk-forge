@@ -872,7 +872,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "Autodesk Forge Instance",
+                        "Value": "Autodesk Forge Instance with dashboard app",
                         "PropagateAtLaunch": "true"
                     }
                 ]
