@@ -56,6 +56,14 @@
             "Description": "Name of the parent stack",
             "Type": "String"
         },
+        "Toggle": {
+            "Type": "String",
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Description": "Toggle to force rolling update"
+        },
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
@@ -140,6 +148,9 @@
                                 {
                                     "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/forge-viewmodels-nodejs-aws-dashboard.zip .\n"
                                 },
+                                "echo toggle: ",
+                                { "Ref" : "Toggle" },
+                                "\n",
                                 "unzip forge-viewmodels-nodejs-aws-dashboard.zip\n",
                                 "cd forge-viewmodels-nodejs-aws-dashboard\n",
                                 "pwd\n",
