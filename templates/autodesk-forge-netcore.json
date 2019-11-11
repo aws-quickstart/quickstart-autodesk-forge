@@ -143,8 +143,7 @@
                                     "Ref": "ForgeClientSecretSSMParameter"
                                 },
                                 " >> /etc/profile\n",
-                                "echo export FORGE_APP_NAME=forge-viewmodels-netcore-aws",
-                                " >> /etc/profile\n",
+                                "echo export FORGE_APP_NAME=forge-viewmodels-netcore-aws >> /etc/profile\n",
                                 "source /etc/profile\n",
                                 {
                                     "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/"
