@@ -23,6 +23,6 @@ tests:
   forge-nodejs:
     parameter_input: forge-taskcat-params.json
     regions:
-      - us-west-2
+      - us-west-1
     template_file: autodesk-forge-master.json
 
