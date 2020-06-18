@@ -73,6 +73,7 @@
                     },
                     "Parameters": [
                         "QSS3BucketName",
+                        "QSS3BucketRegion",
                         "QSS3KeyPrefix"
                     ]
                 }
@@ -116,6 +117,9 @@
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 bucket name"
+                },
+                "QSS3BucketRegion": {
+                    "default": "Quick Start S3 bucket region"
                 },
                 "QSS3KeyPrefix": {
                     "default": "Quick Start S3 key prefix"
@@ -249,6 +253,11 @@
             "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
+        "QSS3BucketRegion": {
+            "Default": "us-east-1",
+            "Description": "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.",
+            "Type": "String"
+        },
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-/]*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
@@ -321,6 +330,16 @@
             "ConstraintDescription": "Must be a valid fully-qualified domain name.",
             "Type": "String",
             "Default": ""
+        }
+    },
+    "Conditions":{
+        "UsingDefaultBucket": {
+            "Fn::Equals": [
+                {
+                    "Ref": "QSS3BucketName"
+                },
+                "aws-quickstart"
+            ]
         }
     },
     "Rules": {
@@ -481,7 +500,17 @@
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template"
+                    "Fn::Sub": [
+                        "https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template",
+                        {
+                            "S3Region": {
+                                "Fn::If": ["UsingDefaultBucket",  { "Ref": "AWS::Region" }, {"Ref": "QSS3BucketRegion"}]
+                            },
+                            "S3Bucket": {
+                                "Fn::If": ["UsingDefaultBucket",  { "Fn::Sub": "${QSS3BucketName}-${AWS::Region}" }, {"Ref": "QSS3BucketName"}]
+                            }
+                        }
+                    ]
                 },
                 "Parameters": {
                     "AvailabilityZones": {
@@ -519,7 +548,17 @@
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template"
+                    "Fn::Sub": [
+                        "https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template",
+                        {
+                            "S3Region": {
+                                "Fn::If": ["UsingDefaultBucket",  { "Ref": "AWS::Region" }, {"Ref": "QSS3BucketRegion"}]
+                            },
+                            "S3Bucket": {
+                                "Fn::If": ["UsingDefaultBucket",  { "Fn::Sub": "${QSS3BucketName}-${AWS::Region}" }, {"Ref": "QSS3BucketName"}]
+                            }
+                        }
+                    ]
                 },
                 "Parameters": {
                     "BastionAMIOS": {
@@ -544,7 +583,26 @@
                         ]
                     },
                     "QSS3BucketName": {
-                        "Ref": "QSS3BucketName"
+                        "Fn::If": [
+                            "UsingDefaultBucket",
+                            {
+                                "Fn::Sub": "${QSS3BucketName}-${AWS::Region}"
+                            },
+                            {
+                                "Ref": "QSS3BucketName"
+                            }
+                        ]
+                    },
+                    "QSS3BucketRegion": {
+                        "Fn::If": [
+                            "UsingDefaultBucket",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            {
+                                "Ref": "QSS3BucketRegion"
+                            }
+                        ]
                     },
                     "QSS3KeyPrefix": {
                         "Fn::Sub": "${QSS3KeyPrefix}submodules/quickstart-linux-bastion/"
@@ -566,7 +624,17 @@
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/autodesk-forge.json"
+                    "Fn::Sub": [
+                        "https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/autodesk-forge.json",
+                        {
+                            "S3Region": {
+                                "Fn::If": ["UsingDefaultBucket",  { "Ref": "AWS::Region" }, {"Ref": "QSS3BucketRegion"}]
+                            },
+                            "S3Bucket": {
+                                "Fn::If": ["UsingDefaultBucket",  { "Fn::Sub": "${QSS3BucketName}-${AWS::Region}" }, {"Ref": "QSS3BucketName"}]
+                            }
+                        }
+                    ]
                 },
                 "Parameters": {
                     "ForgeNodeInstanceType": {
@@ -630,7 +698,26 @@
                         "Ref": "RemoteAccessCIDR"
                     },
                     "QSS3BucketName": {
-                        "Ref": "QSS3BucketName"
+                        "Fn::If": [
+                            "UsingDefaultBucket",
+                            {
+                                "Fn::Sub": "${QSS3BucketName}-${AWS::Region}"
+                            },
+                            {
+                                "Ref": "QSS3BucketName"
+                            }
+                        ]
+                    },
+                    "QSS3BucketRegion": {
+                        "Fn::If": [
+                            "UsingDefaultBucket",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            {
+                                "Ref": "QSS3BucketRegion"
+                            }
+                        ]
                     },
                     "QSS3KeyPrefix": {
                         "Ref": "QSS3KeyPrefix"
