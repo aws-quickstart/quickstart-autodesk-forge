@@ -56,8 +56,8 @@ tests:
       - eu-west-3
       - us-east-1
       - us-east-2
-      - us-west-1
       - us-west-2
+      - us-west-1
     s3_bucket: ''
     template: templates/autodesk-forge-master.json
   forge-sa-east-1:
