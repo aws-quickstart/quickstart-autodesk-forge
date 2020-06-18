@@ -71,12 +71,27 @@
             "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
+        "QSS3BucketRegion": {
+            "Default": "us-east-1",
+            "Description": "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.",
+            "Type": "String"
+        },
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-/]*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
             "Default": "quickstart-autodesk-forge/",
             "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
             "Type": "String"
+        }
+    },
+    "Conditions":{
+        "UsingDefaultBucket": {
+            "Fn::Equals": [
+                {
+                    "Ref": "QSS3BucketName"
+                },
+                "aws-quickstart"
+            ]
         }
     },
     "Resources": {
@@ -146,7 +161,14 @@
                                 "echo export FORGE_APP_NAME=forge-viewmodels-netcore-aws >> /etc/profile\n",
                                 "source /etc/profile\n",
                                 {
-                                    "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/"
+                                    "Fn::Sub": [
+                                        "aws s3 cp s3://${S3Bucket}/${QSS3KeyPrefix}packages/forge-viewmodels-netcore-aws.zip .\n",
+                                        {
+                                            "S3Bucket": {
+                                                "Fn::If": ["UsingDefaultBucket",  { "Fn::Sub": "${QSS3BucketName}-${AWS::Region}" }, {"Ref": "QSS3BucketName"}]
+                                            }
+                                        }
+                                    ]
                                 },
                                 "$FORGE_APP_NAME.zip .\n",
                                 "echo toggle: ",

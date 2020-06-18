@@ -71,6 +71,7 @@
                     },
                     "Parameters": [
                         "QSS3BucketName",
+                        "QSS3BucketRegion",
                         "QSS3KeyPrefix"
                     ]
                 }
@@ -108,6 +109,9 @@
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 bucket name"
+                },
+                "QSS3BucketRegion": {
+                    "default": "Quick Start S3 bucket region"
                 },
                 "QSS3KeyPrefix": {
                     "default": "Quick Start S3 key prefix"
@@ -206,6 +210,11 @@
             "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
+        "QSS3BucketRegion": {
+            "Default": "us-east-1",
+            "Description": "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.",
+            "Type": "String"
+        },
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-/]*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
@@ -278,6 +287,14 @@
         }
     },
     "Conditions": {
+        "UsingDefaultBucket": {
+            "Fn::Equals": [
+                {
+                    "Ref": "QSS3BucketName"
+                },
+                "aws-quickstart"
+            ]
+        },
         "UseALBSSL": {
             "Fn::Not": [
                 {
@@ -693,7 +710,14 @@
                                         "s3:GetObject"
                                     ],
                                     "Resource": {
-                                        "Fn::Sub": "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                                        "Fn::Sub": [
+                                            "arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*",
+                                            {
+                                                "S3Bucket": {
+                                                    "Fn::If": ["UsingDefaultBucket",  { "Fn::Sub": "${QSS3BucketName}-${AWS::Region}" }, {"Ref": "QSS3BucketName"}]
+                                                }
+                                            }
+                                        ]
                                     },
                                     "Effect": "Allow"
                                 }
@@ -764,8 +788,14 @@
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
-                        "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/${ForgeLaunchConfigTemplate}",
+                        "https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/${ForgeLaunchConfigTemplate}",
                         {
+                            "S3Region": {
+                                "Fn::If": ["UsingDefaultBucket",  { "Ref": "AWS::Region" }, {"Ref": "QSS3BucketRegion"}]
+                            },
+                            "S3Bucket": {
+                                "Fn::If": ["UsingDefaultBucket",  { "Fn::Sub": "${QSS3BucketName}-${AWS::Region}" }, {"Ref": "QSS3BucketName"}]
+                            },
                             "ForgeLaunchConfigTemplate": {
                                 "Fn::If": [
                                     "UseNodeJSConfig",
@@ -800,7 +830,26 @@
                     },
                     "Toggle": "false",
                     "QSS3BucketName": {
-                        "Ref": "QSS3BucketName"
+                        "Fn::If": [
+                            "UsingDefaultBucket",
+                            {
+                                "Fn::Sub": "${QSS3BucketName}-${AWS::Region}"
+                            },
+                            {
+                                "Ref": "QSS3BucketName"
+                            }
+                        ]
+                    },
+                    "QSS3BucketRegion": {
+                        "Fn::If": [
+                            "UsingDefaultBucket",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            {
+                                "Ref": "QSS3BucketRegion"
+                            }
+                        ]
                     },
                     "QSS3KeyPrefix": {
                         "Ref": "QSS3KeyPrefix"
