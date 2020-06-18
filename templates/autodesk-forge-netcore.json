@@ -162,7 +162,7 @@
                                 "source /etc/profile\n",
                                 {
                                     "Fn::Sub": [
-                                        "aws s3 cp s3://${S3Bucket}/${QSS3KeyPrefix}packages/forge-viewmodels-netcore-aws.zip .\n",
+                                        "aws s3 cp s3://${S3Bucket}/${QSS3KeyPrefix}packages/",
                                         {
                                             "S3Bucket": {
                                                 "Fn::If": ["UsingDefaultBucket",  { "Fn::Sub": "${QSS3BucketName}-${AWS::Region}" }, {"Ref": "QSS3BucketName"}]
