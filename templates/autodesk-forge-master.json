@@ -171,7 +171,7 @@
                 "Ubuntu-Server-20.04-LTS-HVM",
                 "SUSE-SLES-15-HVM"
             ],
-            "Default": "Amazon-Linux-HVM",
+            "Default": "Amazon-Linux2-HVM",
             "Description": "The Linux distribution for the AMI to be used for the bastion instances.",
             "Type": "String"
         },
