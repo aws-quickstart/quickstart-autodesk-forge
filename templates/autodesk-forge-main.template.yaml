@@ -1,0 +1,448 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  This master template creates a VPC infrastructure for a multi-AZ, multi-tier deployment
+  of Autodesk Forge on AWS. It deploys a VPC with bastions and a Forge cluster behind
+  an ALB. **WARNING** This template creates EC2 instances and related resources. You
+  will be billed for the AWS resources used if you create a stack from this template.
+  (qs-1oqea623r)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: VPC network configuration
+        Parameters:
+          - AvailabilityZones
+          - VPCCIDR
+          - PrivateSubnet1CIDR
+          - PrivateSubnet2CIDR
+          - PublicSubnet1CIDR
+          - PublicSubnet2CIDR
+          - RemoteAccessCIDR
+      - Label:
+          default: Bastion host configuration
+        Parameters:
+          - KeyPairName
+          - BastionAMIOS
+          - BastionInstanceType
+      - Label:
+          default: Autodesk Forge nodes configuration
+        Parameters:
+          - ForgeNodeInstanceType
+          - ForgeNodesMinSize
+          - ForgeNodesDesiredCapacity
+          - ForgeNodesMaxSize
+          - OperatorEmail
+      - Label:
+          default: Autodesk Forge application runtime configuration
+        Parameters:
+          - ForgeApplicationRuntime
+      - Label:
+          default: Autodesk Forge credentials
+        Parameters:
+          - ForgeClientId
+          - ForgeClientSecret
+      - Label:
+          default: '[Optional] Forge site domain configuration'
+        Parameters:
+          - ForgeSiteDomain
+          - ALBSSLCertificateARN
+          - Route53HostedZoneId
+      - Label:
+          default: AWS Quick Start configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3BucketRegion
+          - QSS3KeyPrefix
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+      BastionAMIOS:
+        default: Bastion AMI operating system
+      BastionInstanceType:
+        default: Bastion instance type
+      KeyPairName:
+        default: Key pair name
+      OperatorEmail:
+        default: Operator email
+      ForgeApplicationRuntime:
+        default: Forge application runtime
+      ForgeClientId:
+        default: Forge client ID
+      ForgeClientSecret:
+        default: Forge client secret
+      PrivateSubnet1CIDR:
+        default: Private subnet 1 CIDR
+      PrivateSubnet2CIDR:
+        default: Private subnet 2 CIDR
+      PublicSubnet1CIDR:
+        default: Public subnet 1 CIDR
+      PublicSubnet2CIDR:
+        default: Public subnet 2 CIDR
+      QSS3BucketName:
+        default: Quick Start S3 bucket name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
+      QSS3KeyPrefix:
+        default: Quick Start S3 key prefix
+      RemoteAccessCIDR:
+        default: Allowed external access CIDR
+      VPCCIDR:
+        default: VPC CIDR
+      ForgeNodeInstanceType:
+        default: Forge nodes instance type
+      ForgeNodesDesiredCapacity:
+        default: Forge nodes desired capacity
+      ForgeNodesMaxSize:
+        default: Forge nodes max size
+      ForgeNodesMinSize:
+        default: Forge nodes min size
+      ForgeSiteDomain:
+        default: Forge site domain
+      ALBSSLCertificateARN:
+        default: ALB SSL certificate ARN
+      Route53HostedZoneId:
+        default: Route 53 hosted zone ID
+Parameters:
+  ALBSSLCertificateARN:
+    Default: ''
+    Description: '[Optional] The ARN of the SSL certificate to be used for the Application
+      Load Balancer.'
+    Type: String
+  AvailabilityZones:
+    Description: The list of Availability Zones to use for the subnets in the VPC.
+      The Quick Start uses two Availability Zones from your list and preserves the
+      logical order you specify.
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+  BastionAMIOS:
+    AllowedValues:
+      - Amazon-Linux2-HVM
+      - CentOS-7-HVM
+      - Ubuntu-Server-20.04-LTS-HVM
+      - SUSE-SLES-15-HVM
+    Default: Amazon-Linux2-HVM
+    Description: The Linux distribution for the AMI to be used for the bastion instances.
+    Type: String
+  BastionInstanceType:
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+    Default: t2.micro
+    Description: Amazon EC2 instance type for the bastion instances.
+    Type: String
+  KeyPairName:
+    Description: The name of an existing public/private key pair, which allows you
+      to securely connect to your instance after it launches.
+    Type: AWS::EC2::KeyPair::KeyName
+  OperatorEmail:
+    AllowedPattern: ([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)
+    ConstraintDescription: Must be a valid email address.
+    Description: Email address that notifications of any scaling operations will be
+      sent to.
+    Type: String
+  ForgeApplicationRuntime:
+    AllowedValues:
+      - Node.js
+      - .NET Core
+    Default: Node.js
+    Description: The runtime environment of the Autodesk Forge application.
+    Type: String
+  ForgeClientId:
+    ConstraintDescription: Input your Forge Client ID
+    Description: Client ID of your Forge application. You can obtain it on the Forge
+      Developer Platform at https://developer.autodesk.com/myapps.
+    NoEcho: 'True'
+    Type: String
+  ForgeClientSecret:
+    ConstraintDescription: Input your Forge Client Secret
+    Description: Client Secret of your Forge application. You can obtain it on the
+      Forge Developer Platform at https://developer.autodesk.com/myapps.
+    NoEcho: 'True'
+    Type: String
+  PrivateSubnet1CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.0.0/19
+    Description: The CIDR block for the private subnet located in Availability Zone
+      1.
+    Type: String
+  PrivateSubnet2CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.32.0/19
+    Description: The CIDR block for the private subnet located in Availability Zone
+      2.
+    Type: String
+  PublicSubnet1CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.128.0/20
+    Description: The CIDR block for the public (DMZ) subnet 1 located in Availability
+      Zone 1.
+    Type: String
+  PublicSubnet2CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.144.0/20
+    Description: The CIDR block for the public (DMZ) subnet 1 located in Availability
+      Zone 2.
+    Type: String
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen(-).
+    Default: aws-quickstart
+    Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
+      can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3BucketRegion:
+    Default: us-east-1
+    Description: The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is
+      hosted. When using your own bucket, you must specify this value.
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slash (/).
+    Default: quickstart-autodesk-forge/
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+  RemoteAccessCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
+    Description: The CIDR IP range that is permitted to access the bastions and Forge
+      web application. We recommend that you set this value to a trusted IP range.
+    Type: String
+  Route53HostedZoneId:
+    Description: '[Optional] Route53 Hosted Zone ID where DNS record for Forge Site
+      Domain will be added.'
+    Type: String
+    Default: ''
+  VPCCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.0.0/16
+    Description: The CIDR block for the VPC.
+    Type: String
+  ForgeNodeInstanceType:
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - t2.xlarge
+      - t2.2xlarge
+      - t3.nano
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3.xlarge
+      - t3.2xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+    ConstraintDescription: Must contain valid instance type
+    Default: t2.large
+    Description: Amazon EC2 instance type for the Autodesk Forge instances.
+    Type: String
+  ForgeNodesDesiredCapacity:
+    Default: '2'
+    Description: The desired capacity for Forge nodes in the Auto Scaling group.
+    Type: String
+  ForgeNodesMaxSize:
+    Default: '4'
+    Description: The maximum number of Forge nodes in the Auto Scaling group.
+    Type: String
+  ForgeNodesMinSize:
+    Default: '2'
+    Description: The minimum number of Forge nodes in the Auto Scaling group.
+    Type: String
+  ForgeSiteDomain:
+    Description: '[Optional] Domain name of the Forge site. e.g. example.com. Valid
+      FQDN required when using SSL.'
+    AllowedPattern: (?!-)[a-zA-Z0-9-.]*(?<!-)
+    ConstraintDescription: Must be a valid fully-qualified domain name.
+    Type: String
+    Default: ''
+Conditions:
+  UsingDefaultBucket: !Equals
+    - !Ref 'QSS3BucketName'
+    - aws-quickstart
+Rules:
+  KeyPairsNotEmpty:
+    Assertions:
+      - Assert: !Not
+          - !EachMemberEquals
+            - !RefAll 'AWS::EC2::KeyPair::KeyName'
+            - ''
+        AssertDescription: All key pair parameters must not be empty
+  SubnetsInVPC:
+    Assertions:
+      - Assert: !EachMemberIn
+          - !ValueOfAll
+            - AWS::EC2::Subnet::Id
+            - VpcId
+          - !RefAll 'AWS::EC2::VPC::Id'
+        AssertDescription: All subnets must in the VPC
+  SslAndRoute53Rule:
+    RuleCondition: !Or
+      - !Not
+        - !Equals
+          - !Ref 'ALBSSLCertificateARN'
+          - ''
+      - !Not
+        - !Equals
+          - !Ref 'Route53HostedZoneId'
+          - ''
+    Assertions:
+      - Assert: !Not
+          - !Equals
+            - !Ref 'ForgeSiteDomain'
+            - ''
+        AssertDescription: Parameter ForgeSiteDomain cannot be empty and must provide
+          FQDN e.g. example.com, when ALBSSLCertificateARN or Route53HostedZoneId
+          values are provided.
+  T3InstanceSupportedRegionRule:
+    Assertions:
+      - Assert: !Not
+          - !And
+            - !Contains
+              - - ap-northeast-2
+                - ap-northeast-3
+                - ap-south-1
+                - eu-west-3
+              - !Ref 'AWS::Region'
+            - !Contains
+              - - t3.nano
+                - t3.micro
+                - t3.small
+                - t3.medium
+                - t3.large
+                - t3.xlarge
+                - t3.2xlarge
+              - !Ref 'ForgeNodeInstanceType'
+        AssertDescription: T3 instances are not supported in Seoul (ap-northeast-2),
+          Osaka-Local (ap-northeast-3), Mumbai (ap-south-1) and Paris (eu-west-3)
+          regions. Please launch the stack with another instance type.
+  TwoAZsRequiredRegionRule:
+    Assertions:
+      - Assert: !Not
+          - !Contains
+            - - ap-northeast-3
+            - !Ref 'AWS::Region'
+        AssertDescription: This Quick Start requires two Availability Zones and not
+          supported in Osaka-Local (ap-northeast-3) region. Please launch the stack
+          in another region to continue.
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml
+        - S3Region: !If
+            - UsingDefaultBucket
+            - !Ref 'AWS::Region'
+            - !Ref 'QSS3BucketRegion'
+          S3Bucket: !If
+            - UsingDefaultBucket
+            - !Sub '${QSS3BucketName}-${AWS::Region}'
+            - !Ref 'QSS3BucketName'
+      Parameters:
+        AvailabilityZones: !Join
+          - ','
+          - !Ref 'AvailabilityZones'
+        NumberOfAZs: '2'
+        PrivateSubnet1ACIDR: !Ref 'PrivateSubnet1CIDR'
+        PrivateSubnet2ACIDR: !Ref 'PrivateSubnet2CIDR'
+        PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
+        PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
+        VPCCIDR: !Ref 'VPCCIDR'
+  BastionStack:
+    DependsOn: VPCStack
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template
+        - S3Region: !If
+            - UsingDefaultBucket
+            - !Ref 'AWS::Region'
+            - !Ref 'QSS3BucketRegion'
+          S3Bucket: !If
+            - UsingDefaultBucket
+            - !Sub '${QSS3BucketName}-${AWS::Region}'
+            - !Ref 'QSS3BucketName'
+      Parameters:
+        BastionAMIOS: !Ref 'BastionAMIOS'
+        BastionInstanceType: !Ref 'BastionInstanceType'
+        KeyPairName: !Ref 'KeyPairName'
+        PublicSubnet1ID: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
+        PublicSubnet2ID: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
+        QSS3BucketName: !If
+          - UsingDefaultBucket
+          - !Sub '${QSS3BucketName}-${AWS::Region}'
+          - !Ref 'QSS3BucketName'
+        QSS3BucketRegion: !If
+          - UsingDefaultBucket
+          - !Ref 'AWS::Region'
+          - !Ref 'QSS3BucketRegion'
+        QSS3KeyPrefix: !Sub '${QSS3KeyPrefix}submodules/quickstart-linux-bastion/'
+        RemoteAccessCIDR: !Ref 'RemoteAccessCIDR'
+        VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
+  ForgeStack:
+    DependsOn: BastionStack
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/autodesk-forge.template.yaml
+        - S3Region: !If
+            - UsingDefaultBucket
+            - !Ref 'AWS::Region'
+            - !Ref 'QSS3BucketRegion'
+          S3Bucket: !If
+            - UsingDefaultBucket
+            - !Sub '${QSS3BucketName}-${AWS::Region}'
+            - !Ref 'QSS3BucketName'
+      Parameters:
+        ForgeNodeInstanceType: !Ref 'ForgeNodeInstanceType'
+        ForgeNodesDesiredCapacity: !Ref 'ForgeNodesDesiredCapacity'
+        ForgeNodesMaxSize: !Ref 'ForgeNodesMaxSize'
+        ForgeNodesMinSize: !Ref 'ForgeNodesMinSize'
+        BastionSecurityGroupID: !GetAtt 'BastionStack.Outputs.BastionSecurityGroupID'
+        KeyPairName: !Ref 'KeyPairName'
+        OperatorEmail: !Ref 'OperatorEmail'
+        ForgeApplicationRuntime: !Ref 'ForgeApplicationRuntime'
+        ForgeClientId: !Ref 'ForgeClientId'
+        ForgeClientSecret: !Ref 'ForgeClientSecret'
+        PrivateSubnet1ID: !GetAtt 'VPCStack.Outputs.PrivateSubnet1AID'
+        PrivateSubnet2ID: !GetAtt 'VPCStack.Outputs.PrivateSubnet2AID'
+        PublicSubnet1ID: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
+        PublicSubnet2ID: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
+        RemoteAccessCIDR: !Ref 'RemoteAccessCIDR'
+        QSS3BucketName: !If
+          - UsingDefaultBucket
+          - !Sub '${QSS3BucketName}-${AWS::Region}'
+          - !Ref 'QSS3BucketName'
+        QSS3BucketRegion: !If
+          - UsingDefaultBucket
+          - !Ref 'AWS::Region'
+          - !Ref 'QSS3BucketRegion'
+        QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
+        ALBSSLCertificateARN: !Ref 'ALBSSLCertificateARN'
+        Route53HostedZoneId: !Ref 'Route53HostedZoneId'
+        ForgeSiteDomain: !Ref 'ForgeSiteDomain'
+        VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
+Outputs:
+  ALBDNSName:
+    Value: !GetAtt 'ForgeStack.Outputs.ALBDNSName'
+    Description: ALB DNS Name
+  ForgeAppURL:
+    Value: !GetAtt 'ForgeStack.Outputs.ForgeAppURL'
+    Description: Forge Application URL
