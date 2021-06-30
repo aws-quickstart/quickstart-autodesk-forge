@@ -441,11 +441,12 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
-                Action:
-                  - ssm:Describe*
-                  - ssm:Get*
-                  - ssm:List*
-                Resource: '*'
+                Action: [
+                    "ssm:DescribePatchProperties", "ssm:DescribeMaintenanceWindowSchedule", "ssm:DescribeDocumentParameters", "ssm:DescribePatchBaselines", "ssm:DescribeInstanceProperties", "ssm:DescribeParameters", "ssm:DescribeMaintenanceWindowExecutions", "ssm:DescribeMaintenanceWindowsForTarget", "ssm:DescribeMaintenanceWindows", "ssm:DescribeEffectiveInstanceAssociations", "ssm:DescribeInstancePatches", "ssm:DescribeMaintenanceWindowExecutionTaskInvocations", "ssm:DescribeDocumentPermission", "ssm:DescribeInstanceInformation", "ssm:DescribeAvailablePatches", "ssm:DescribePatchGroupState", "ssm:DescribeMaintenanceWindowTargets", "ssm:DescribeSessions", "ssm:DescribeAssociationExecutions", "ssm:DescribeInstancePatchStates", "ssm:DescribeAutomationStepExecutions", "ssm:DescribeAssociation", "ssm:DescribeInstancePatchStatesForPatchGroup", "ssm:DescribeMaintenanceWindowExecutionTasks", "ssm:DescribeAssociationExecutionTargets", "ssm:DescribeDocument", "ssm:DescribePatchGroups", "ssm:DescribeOpsItems", "ssm:DescribeActivations", "ssm:DescribeInventoryDeletions", "ssm:DescribeInstanceAssociationsStatus", "ssm:DescribeAutomationExecutions", "ssm:DescribeEffectivePatchesForPatchBaseline", "ssm:DescribeMaintenanceWindowTasks",
+                    "ssm:GetDocument", "ssm:GetOpsMetadata", "ssm:GetMaintenanceWindowExecutionTask", "ssm:GetConnectionStatus", "ssm:GetDeployablePatchSnapshotForInstance", "ssm:GetParameterHistory", "ssm:GetOpsItem", "ssm:GetPatchBaseline", "ssm:GetInventory", "ssm:GetManifest", "ssm:GetCalendarState", "ssm:GetParameter", "ssm:GetOpsSummary", "ssm:GetCommandInvocation", "ssm:GetMaintenanceWindow", "ssm:GetParametersByPath", "ssm:GetInventorySchema", "ssm:GetParameters", "ssm:GetAutomationExecution", "ssm:GetServiceSetting", "ssm:GetMaintenanceWindowTask", "ssm:GetDefaultPatchBaseline", "ssm:GetMaintenanceWindowExecution", "ssm:GetMaintenanceWindowExecutionTaskInvocation", "ssm:GetPatchBaselineForPatchGroup",
+                    "ssm:ListOpsItemRelatedItems", "ssm:ListTagsForResource", "ssm:ListCommands", "ssm:ListResourceDataSync", "ssm:ListOpsMetadata", "ssm:ListInstanceAssociations", "ssm:ListAssociations", "ssm:ListAssociationVersions", "ssm:ListDocumentMetadataHistory", "ssm:ListCommandInvocations", "ssm:ListInventoryEntries", "ssm:ListComplianceItems", "ssm:ListComplianceSummaries", "ssm:ListResourceComplianceSummaries", "ssm:ListDocuments", "ssm:ListDocumentVersions", "ssm:ListOpsItemEvents"
+                ]
+                Resource: !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*
           PolicyName: aws-quick-start-forge-ssm-policy
   SetupRoleProfile:
     Type: AWS::IAM::InstanceProfile
