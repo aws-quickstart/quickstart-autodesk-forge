@@ -5,6 +5,10 @@ Description: >-
   You will be billed for the AWS resources used if you create a stack from this template.
   (qs-1oqea6241)
 Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - W9006 # temporary to get rid of warnings
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -405,7 +409,7 @@ Resources:
       HostedZoneId: !Ref 'Route53HostedZoneId'
       AliasTarget:
         DNSName: !GetAtt 'ApplicationLoadBalancer.DNSName'
-        EvaluateTargetHealth: 'True'
+        EvaluateTargetHealth: true
         HostedZoneId: !GetAtt 'ApplicationLoadBalancer.CanonicalHostedZoneID'
   SetupRole:
     Type: AWS::IAM::Role
@@ -456,12 +460,12 @@ Resources:
       VpcId: !Ref 'VPCID'
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: '3000'
-          ToPort: '3000'
+          FromPort: 3000
+          ToPort: 3000
           SourceSecurityGroupId: !Ref 'ELBSecurityGroup'
         - IpProtocol: tcp
-          FromPort: '22'
-          ToPort: '22'
+          FromPort: 22
+          ToPort: 22
           SourceSecurityGroupId: !Ref 'BastionSecurityGroupID'
   WorkloadASLaunchConfigStack:
     Type: AWS::CloudFormation::Stack
@@ -493,10 +497,6 @@ Resources:
           - UsingDefaultBucket
           - !Sub '${QSS3BucketName}-${AWS::Region}'
           - !Ref 'QSS3BucketName'
-        QSS3BucketRegion: !If
-          - UsingDefaultBucket
-          - !Ref 'AWS::Region'
-          - !Ref 'QSS3BucketRegion'
         QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
   WebServerTargetTrackingScalingPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
@@ -516,33 +516,34 @@ Resources:
         - !Ref 'PrivateSubnet2ID'
       Cooldown: '600'
       DesiredCapacity: !Ref 'ForgeNodesDesiredCapacity'
-      HealthCheckGracePeriod: '600'
+      HealthCheckGracePeriod: 600
       HealthCheckType: EC2
       LaunchConfigurationName: !GetAtt 'WorkloadASLaunchConfigStack.Outputs.WorkloadASLaunchConfig'
       TargetGroupARNs:
         - !Ref 'ALBTargetGroup'
       MaxSize: !Ref 'ForgeNodesMaxSize'
       MinSize: !Ref 'ForgeNodesMinSize'
-      NotificationConfiguration:
-        TopicARN: !Ref 'NotificationTopic'
-        NotificationTypes:
-          - autoscaling:EC2_INSTANCE_LAUNCH
-          - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
-          - autoscaling:EC2_INSTANCE_TERMINATE
-          - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
-          - autoscaling:TEST_NOTIFICATION
+      NotificationConfigurations:
+        -
+          TopicARN: !Ref 'NotificationTopic'
+          NotificationTypes:
+            - autoscaling:EC2_INSTANCE_LAUNCH
+            - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
+            - autoscaling:EC2_INSTANCE_TERMINATE
+            - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
+            - autoscaling:TEST_NOTIFICATION
       Tags:
         - Key: Name
           Value: Autodesk Forge Instance
-          PropagateAtLaunch: 'true'
+          PropagateAtLaunch: true
     CreationPolicy:
       ResourceSignal:
         Count: !Ref 'ForgeNodesDesiredCapacity'
         Timeout: PT2H
     UpdatePolicy:
       AutoScalingRollingUpdate:
-        MinInstancesInService: '1'
-        MaxBatchSize: '1'
+        MinInstancesInService: 1
+        MaxBatchSize: 1
         PauseTime: PT1M
         SuspendProcesses:
           - HealthCheck
