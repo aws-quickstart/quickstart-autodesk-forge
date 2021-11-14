@@ -43,7 +43,8 @@
                         "default": "Autodesk Forge application runtime configuration"
                     },
                     "Parameters": [
-                        "ForgeApplicationRuntime"
+                        "ForgeApplicationRuntime",
+                        "ForgeAppName"
                     ]
                 },
                 {
@@ -71,6 +72,7 @@
                     },
                     "Parameters": [
                         "QSS3BucketName",
+                        "QSS3BucketRegion",
                         "QSS3KeyPrefix"
                     ]
                 }
@@ -87,6 +89,9 @@
                 },
                 "ForgeApplicationRuntime": {
                     "default": "Forge application runtime"
+                },
+                "ForgeAppName": {
+                    "default": "Forge application name"
                 },
                 "ForgeClientId": {
                     "default": "Forge client ID"
@@ -108,6 +113,9 @@
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 bucket name"
+                },
+                "QSS3BucketRegion": {
+                    "default": "Quick Start S3 bucket region"
                 },
                 "QSS3KeyPrefix": {
                     "default": "Quick Start S3 key prefix"
@@ -206,6 +214,11 @@
             "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
+        "QSS3BucketRegion": {
+            "Default": "us-east-1",
+            "Description": "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.",
+            "Type": "String"
+        },
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-/]*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
@@ -269,6 +282,11 @@
             "Description": "The minimum number of Forge nodes in the Auto Scaling group.",
             "Type": "String"
         },
+        "ForgeAppName": {
+            "Default": "forge-viewmodels-nodejs-aws",
+            "Description": "The name of the zip file that contains the packaged Forge application, without the .zip extension. The two provided options are forge-viewmodels-nodejs-aws and forge-viewmodels-netcore-aws. To deploy a custom application, you would need to deploy this Quick Start from your own private S3 bucket and add your custom package in the packages directory.",
+            "Type": "String"
+        },
         "ForgeSiteDomain": {
             "Description": "[Optional] Domain name of the Forge site. e.g. example.com. Valid FQDN required when using SSL.",
             "AllowedPattern": "(?!-)[a-zA-Z0-9-.]*(?<!-)",
@@ -278,6 +296,14 @@
         }
     },
     "Conditions": {
+        "UsingDefaultBucket": {
+            "Fn::Equals": [
+                {
+                    "Ref": "QSS3BucketName"
+                },
+                "aws-quickstart"
+            ]
+        },
         "UseALBSSL": {
             "Fn::Not": [
                 {
@@ -693,7 +719,14 @@
                                         "s3:GetObject"
                                     ],
                                     "Resource": {
-                                        "Fn::Sub": "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+                                        "Fn::Sub": [
+                                            "arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*",
+                                            {
+                                                "S3Bucket": {
+                                                    "Fn::If": ["UsingDefaultBucket",  { "Fn::Sub": "${QSS3BucketName}-${AWS::Region}" }, {"Ref": "QSS3BucketName"}]
+                                                }
+                                            }
+                                        ]
                                     },
                                     "Effect": "Allow"
                                 }
@@ -764,8 +797,14 @@
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
-                        "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/${ForgeLaunchConfigTemplate}",
+                        "https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/${ForgeLaunchConfigTemplate}",
                         {
+                            "S3Region": {
+                                "Fn::If": ["UsingDefaultBucket",  { "Ref": "AWS::Region" }, {"Ref": "QSS3BucketRegion"}]
+                            },
+                            "S3Bucket": {
+                                "Fn::If": ["UsingDefaultBucket",  { "Fn::Sub": "${QSS3BucketName}-${AWS::Region}" }, {"Ref": "QSS3BucketName"}]
+                            },
                             "ForgeLaunchConfigTemplate": {
                                 "Fn::If": [
                                     "UseNodeJSConfig",
@@ -779,6 +818,9 @@
                 "Parameters": {
                     "ForgeNodeInstanceType": {
                         "Ref": "ForgeNodeInstanceType"
+                    },
+                    "ForgeAppName": {
+                        "Ref": "ForgeAppName"
                     },
                     "KeyPairName": {
                         "Ref": "KeyPairName"
@@ -800,7 +842,26 @@
                     },
                     "Toggle": "false",
                     "QSS3BucketName": {
-                        "Ref": "QSS3BucketName"
+                        "Fn::If": [
+                            "UsingDefaultBucket",
+                            {
+                                "Fn::Sub": "${QSS3BucketName}-${AWS::Region}"
+                            },
+                            {
+                                "Ref": "QSS3BucketName"
+                            }
+                        ]
+                    },
+                    "QSS3BucketRegion": {
+                        "Fn::If": [
+                            "UsingDefaultBucket",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            {
+                                "Ref": "QSS3BucketRegion"
+                            }
+                        ]
                     },
                     "QSS3KeyPrefix": {
                         "Ref": "QSS3KeyPrefix"

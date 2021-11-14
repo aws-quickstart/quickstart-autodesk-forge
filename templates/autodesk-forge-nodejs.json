@@ -32,6 +32,11 @@
             "Description": "Amazon EC2 instance type for the Autodesk Forge instances.",
             "Type": "String"
         },
+        "ForgeAppName": {
+            "Default": "forge-viewmodels-nodejs-aws",
+            "Description": "The name of the zip file that contains the packaged Forge application, without the .zip extension. The two provided options are forge-viewmodels-nodejs-aws and forge-viewmodels-netcore-aws. To deploy a custom application, you would need to deploy this Quick Start from your own private S3 bucket and add your custom package in the packages directory.",
+            "Type": "String"
+        },
         "ForgeClientIdSSMParameter": {
             "Description": "Forge Client ID SSM parameter",
             "Type": "AWS::SSM::Parameter::Name"
@@ -71,12 +76,27 @@
             "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
+        "QSS3BucketRegion": {
+            "Default": "us-east-1",
+            "Description": "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.",
+            "Type": "String"
+        },
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-/]*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
             "Default": "quickstart-autodesk-forge/",
             "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
             "Type": "String"
+        }
+    },
+    "Conditions":{
+        "UsingDefaultBucket": {
+            "Fn::Equals": [
+                {
+                    "Ref": "QSS3BucketName"
+                },
+                "aws-quickstart"
+            ]
         }
     },
     "Resources": {
@@ -124,7 +144,7 @@
                                 "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1\n",
                                 "# update AWS cfn bootsrap\n",
                                 "# yum update -y aws-cfn-bootstrap\n",
-                                "curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -\n",
+                                "curl --silent --location https://rpm.nodesource.com/setup_14.x | bash -\n",
                                 "yum -y install nodejs\n",
                                 "# install pm2 to restart node app\n",
                                 "npm i -g pm2@2.4.3\n",
@@ -144,10 +164,21 @@
                                     "Ref": "ForgeClientSecretSSMParameter"
                                 },
                                 " >> /etc/profile\n",
-                                "echo export FORGE_APP_NAME=forge-viewmodels-nodejs-aws >> /etc/profile\n",
+                                "echo export FORGE_APP_NAME=",
+                                {
+                                    "Ref": "ForgeAppName"
+                                },
+                                " >> /etc/profile\n",
                                 "source /etc/profile\n",
                                 {
-                                    "Fn::Sub": "aws s3 cp s3://${QSS3BucketName}/${QSS3KeyPrefix}packages/"
+                                    "Fn::Sub": [
+                                        "aws s3 cp s3://${S3Bucket}/${QSS3KeyPrefix}packages/",
+                                        {
+                                            "S3Bucket": {
+                                                "Fn::If": ["UsingDefaultBucket",  { "Fn::Sub": "${QSS3BucketName}-${AWS::Region}" }, {"Ref": "QSS3BucketName"}]
+                                            }
+                                        }
+                                    ]
                                 },
                                 "$FORGE_APP_NAME.zip .\n",
                                 "echo toggle: ",
