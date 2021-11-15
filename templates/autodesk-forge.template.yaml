@@ -521,10 +521,6 @@ Resources:
           - UsingDefaultBucket
           - !Sub '${QSS3BucketName}-${AWS::Region}'
           - !Ref 'QSS3BucketName'
-        QSS3BucketRegion: !If
-          - UsingDefaultBucket
-          - !Ref 'AWS::Region'
-          - !Ref 'QSS3BucketRegion'
         QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
   WebServerTargetTrackingScalingPolicy:
     Type: AWS::AutoScaling::ScalingPolicy

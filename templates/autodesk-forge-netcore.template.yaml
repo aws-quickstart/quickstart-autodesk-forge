@@ -49,6 +49,7 @@ Parameters:
   LatestAmazonLinux2Id:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+    Description: Latest Amazon Linux 2 AMI ID from AWS Systems Manager Parameter Store.
   WorkloadSecurityGroup:
     Description: ID of the Forge workload security group (e.g., sg-7f16e910).
     Type: AWS::EC2::SecurityGroup::Id
@@ -73,11 +74,6 @@ Parameters:
     Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
       can include numbers, lowercase letters, uppercase letters, and hyphens (-).
       It cannot start or end with a hyphen (-).
-    Type: String
-  QSS3BucketRegion:
-    Default: us-east-1
-    Description: The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is
-      hosted. When using your own bucket, you must specify this value.
     Type: String
   QSS3KeyPrefix:
     AllowedPattern: ^[0-9a-zA-Z-/]*$
