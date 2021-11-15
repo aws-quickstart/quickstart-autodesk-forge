@@ -1,6 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: This template deploys Autodesk Forge Auto Scaling launch configuration
-  for .NetCore runtime.
+  for .NetCore runtime. (qs-1s22alja6)
+Metadata:
+  cfn-lint: { config: { ignore_checks: [W9002, W9003, W9006] } }
 Parameters:
   KeyPairName:
     Description: The name of an existing public/private key pair, which allows you
@@ -106,7 +108,7 @@ Resources:
     Properties:
       KeyName: !Ref 'KeyPairName'
       ImageId: !Ref 'LatestAmazonLinux2Id'
-      InstanceMonitoring: 'true'
+      InstanceMonitoring: true
       IamInstanceProfile: !Ref 'SetupRoleProfile'
       InstanceType: !Ref 'ForgeNodeInstanceType'
       SecurityGroups:

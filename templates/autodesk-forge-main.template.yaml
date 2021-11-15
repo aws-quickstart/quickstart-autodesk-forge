@@ -1,10 +1,20 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: This master template creates a VPC infrastructure for a multi-AZ, multi-tier
+Description: This main template creates a VPC infrastructure for a multi-AZ, multi-tier
   deployment of Autodesk Forge on AWS. It deploys a VPC with bastions and a Forge
   cluster behind an ALB. **WARNING** This template creates EC2 instances and related
   resources. You will be billed for the AWS resources used if you create a stack from
   this template. (qs-1oqea623r)
 Metadata:
+  LintSpellExclude:
+    - Application
+    - Autodesk
+    - Balancer
+    - Forge
+    - Load
+  cfn-lint:
+    config:
+      ignore_checks:
+        - W9006 # temporary to get rid of warnings
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -21,6 +31,7 @@ Metadata:
           default: Bastion host configuration
         Parameters:
           - KeyPairName
+          - EnableBastionHost
           - BastionInstanceType
       - Label:
           default: Autodesk Forge nodes configuration
@@ -57,6 +68,8 @@ Metadata:
         default: Availability Zones
       BastionInstanceType:
         default: Bastion instance type
+      EnableBastionHost:
+        default: Enable bastion host
       KeyPairName:
         default: Key pair name
       OperatorEmail:
@@ -368,7 +381,6 @@ Resources:
           Fn::Join:
             - ','
             - !Ref 'AvailabilityZones'
-        KeyPairName: !Ref 'KeyPairName'
         NumberOfAZs: '2'
         PrivateSubnet1ACIDR: !Ref 'PrivateSubnet1CIDR'
         PrivateSubnet2ACIDR: !Ref 'PrivateSubnet2CIDR'
@@ -376,7 +388,6 @@ Resources:
         PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
         VPCCIDR: !Ref 'VPCCIDR'
   BastionStack:
-    DependsOn: VPCStack
     Condition: UsingBastion
     Type: AWS::CloudFormation::Stack
     Properties:

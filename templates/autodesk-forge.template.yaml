@@ -4,6 +4,10 @@ Description: This template deploys Autodesk Forge in an ASG behind an ALB load b
   resources. You will be billed for the AWS resources used if you create a stack from
   this template. (qs-1oqea6241)
 Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - W9006 # temporary to get rid of warnings
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -420,7 +424,7 @@ Resources:
       HostedZoneId: !Ref 'Route53HostedZoneId'
       AliasTarget:
         DNSName: !GetAtt 'ApplicationLoadBalancer.DNSName'
-        EvaluateTargetHealth: 'True'
+        EvaluateTargetHealth: true
         HostedZoneId: !GetAtt 'ApplicationLoadBalancer.CanonicalHostedZoneID'
   SetupRole:
     Type: AWS::IAM::Role
@@ -455,11 +459,12 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
-                Action:
-                  - ssm:Describe*
-                  - ssm:Get*
-                  - ssm:List*
-                Resource: '*'
+                Action: [
+                    "ssm:DescribePatchProperties", "ssm:DescribeMaintenanceWindowSchedule", "ssm:DescribeDocumentParameters", "ssm:DescribePatchBaselines", "ssm:DescribeInstanceProperties", "ssm:DescribeParameters", "ssm:DescribeMaintenanceWindowExecutions", "ssm:DescribeMaintenanceWindowsForTarget", "ssm:DescribeMaintenanceWindows", "ssm:DescribeEffectiveInstanceAssociations", "ssm:DescribeInstancePatches", "ssm:DescribeMaintenanceWindowExecutionTaskInvocations", "ssm:DescribeDocumentPermission", "ssm:DescribeInstanceInformation", "ssm:DescribeAvailablePatches", "ssm:DescribePatchGroupState", "ssm:DescribeMaintenanceWindowTargets", "ssm:DescribeSessions", "ssm:DescribeAssociationExecutions", "ssm:DescribeInstancePatchStates", "ssm:DescribeAutomationStepExecutions", "ssm:DescribeAssociation", "ssm:DescribeInstancePatchStatesForPatchGroup", "ssm:DescribeMaintenanceWindowExecutionTasks", "ssm:DescribeAssociationExecutionTargets", "ssm:DescribeDocument", "ssm:DescribePatchGroups", "ssm:DescribeOpsItems", "ssm:DescribeActivations", "ssm:DescribeInventoryDeletions", "ssm:DescribeInstanceAssociationsStatus", "ssm:DescribeAutomationExecutions", "ssm:DescribeEffectivePatchesForPatchBaseline", "ssm:DescribeMaintenanceWindowTasks",
+                    "ssm:GetDocument", "ssm:GetOpsMetadata", "ssm:GetMaintenanceWindowExecutionTask", "ssm:GetConnectionStatus", "ssm:GetDeployablePatchSnapshotForInstance", "ssm:GetParameterHistory", "ssm:GetOpsItem", "ssm:GetPatchBaseline", "ssm:GetInventory", "ssm:GetManifest", "ssm:GetCalendarState", "ssm:GetParameter", "ssm:GetOpsSummary", "ssm:GetCommandInvocation", "ssm:GetMaintenanceWindow", "ssm:GetParametersByPath", "ssm:GetInventorySchema", "ssm:GetParameters", "ssm:GetAutomationExecution", "ssm:GetServiceSetting", "ssm:GetMaintenanceWindowTask", "ssm:GetDefaultPatchBaseline", "ssm:GetMaintenanceWindowExecution", "ssm:GetMaintenanceWindowExecutionTaskInvocation", "ssm:GetPatchBaselineForPatchGroup",
+                    "ssm:ListOpsItemRelatedItems", "ssm:ListTagsForResource", "ssm:ListCommands", "ssm:ListResourceDataSync", "ssm:ListOpsMetadata", "ssm:ListInstanceAssociations", "ssm:ListAssociations", "ssm:ListAssociationVersions", "ssm:ListDocumentMetadataHistory", "ssm:ListCommandInvocations", "ssm:ListInventoryEntries", "ssm:ListComplianceItems", "ssm:ListComplianceSummaries", "ssm:ListResourceComplianceSummaries", "ssm:ListDocuments", "ssm:ListDocumentVersions", "ssm:ListOpsItemEvents"
+                ]
+                Resource: !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*
           PolicyName: aws-quick-start-forge-ssm-policy
   SetupRoleProfile:
     Type: AWS::IAM::InstanceProfile
@@ -474,15 +479,15 @@ Resources:
       VpcId: !Ref 'VPCID'
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: '3000'
-          ToPort: '3000'
+          FromPort: 3000
+          ToPort: 3000
           SourceSecurityGroupId: !Ref 'ELBSecurityGroup'
         - !If
           - UseBastionSG
           -
             IpProtocol: tcp
-            FromPort: '22'
-            ToPort: '22'
+            FromPort: 22
+            ToPort: 22
             SourceSecurityGroupId: !Ref 'BastionSecurityGroupID'
           - !Ref 'AWS::NoValue'
   WorkloadASLaunchConfigStack:
@@ -539,33 +544,34 @@ Resources:
         - !Ref 'PrivateSubnet2ID'
       Cooldown: '600'
       DesiredCapacity: !Ref 'ForgeNodesDesiredCapacity'
-      HealthCheckGracePeriod: '600'
+      HealthCheckGracePeriod: 600
       HealthCheckType: EC2
       LaunchConfigurationName: !GetAtt 'WorkloadASLaunchConfigStack.Outputs.WorkloadASLaunchConfig'
       TargetGroupARNs:
         - !Ref 'ALBTargetGroup'
       MaxSize: !Ref 'ForgeNodesMaxSize'
       MinSize: !Ref 'ForgeNodesMinSize'
-      NotificationConfiguration:
-        TopicARN: !Ref 'NotificationTopic'
-        NotificationTypes:
-          - autoscaling:EC2_INSTANCE_LAUNCH
-          - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
-          - autoscaling:EC2_INSTANCE_TERMINATE
-          - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
-          - autoscaling:TEST_NOTIFICATION
+      NotificationConfigurations:
+        -
+          TopicARN: !Ref 'NotificationTopic'
+          NotificationTypes:
+            - autoscaling:EC2_INSTANCE_LAUNCH
+            - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
+            - autoscaling:EC2_INSTANCE_TERMINATE
+            - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
+            - autoscaling:TEST_NOTIFICATION
       Tags:
         - Key: Name
           Value: Autodesk Forge Instance
-          PropagateAtLaunch: 'true'
+          PropagateAtLaunch: true
     CreationPolicy:
       ResourceSignal:
         Count: !Ref 'ForgeNodesDesiredCapacity'
         Timeout: PT2H
     UpdatePolicy:
       AutoScalingRollingUpdate:
-        MinInstancesInService: '1'
-        MaxBatchSize: '1'
+        MinInstancesInService: 1
+        MaxBatchSize: 1
         PauseTime: PT1M
         SuspendProcesses:
           - HealthCheck
