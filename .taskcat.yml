@@ -26,9 +26,12 @@ tests:
       AvailabilityZones: $[taskcat_genaz_2]
       BastionAMIOS: Amazon-Linux2-HVM
       BastionInstanceType: t2.micro
+      EnableBastionHost: Disabled
       ForgeClientId: override_this
       ForgeClientSecret: override_this
       ForgeNodeInstanceType: t2.micro
+      ForgeAppName: forge-viewmodels-nodejs-aws
+      ForgeApplicationRuntime: "Node.js"
       ForgeNodesDesiredCapacity: '2'
       ForgeNodesMaxSize: '4'
       ForgeNodesMinSize: '2'
@@ -58,7 +61,9 @@ tests:
       AvailabilityZones: $[taskcat_genaz_2]
       BastionAMIOS: Amazon-Linux2-HVM
       BastionInstanceType: t2.micro
-      ForgeApplicationRuntime: .NET Core
+      EnableBastionHost: Disabled
+      ForgeApplicationRuntime: ".NET Core"
+      ForgeAppName: forge-viewmodels-netcore-aws
       ForgeClientId: override_this
       ForgeClientSecret: override_this
       ForgeNodeInstanceType: t2.micro

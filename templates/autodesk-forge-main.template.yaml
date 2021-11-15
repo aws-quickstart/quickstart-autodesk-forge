@@ -1,10 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: >-
-  This main template creates a VPC infrastructure for a multi-AZ, multi-tier deployment
-  of Autodesk Forge on AWS. It deploys a VPC with bastions and a Forge cluster behind
-  an ALB. **WARNING** This template creates EC2 instances and related resources. You
-  will be billed for the AWS resources used if you create a stack from this template.
-  (qs-1oqea623r)
+Description: This main template creates a VPC infrastructure for a multi-AZ, multi-tier
+  deployment of Autodesk Forge on AWS. It deploys a VPC with bastions and a Forge
+  cluster behind an ALB. **WARNING** This template creates EC2 instances and related
+  resources. You will be billed for the AWS resources used if you create a stack from
+  this template. (qs-1oqea623r)
 Metadata:
   LintSpellExclude:
     - Application
@@ -32,7 +31,7 @@ Metadata:
           default: Bastion host configuration
         Parameters:
           - KeyPairName
-          - BastionAMIOS
+          - EnableBastionHost
           - BastionInstanceType
       - Label:
           default: Autodesk Forge nodes configuration
@@ -46,6 +45,7 @@ Metadata:
           default: Autodesk Forge application runtime configuration
         Parameters:
           - ForgeApplicationRuntime
+          - ForgeAppName
       - Label:
           default: Autodesk Forge credentials
         Parameters:
@@ -66,16 +66,18 @@ Metadata:
     ParameterLabels:
       AvailabilityZones:
         default: Availability Zones
-      BastionAMIOS:
-        default: Bastion AMI operating system
       BastionInstanceType:
         default: Bastion instance type
+      EnableBastionHost:
+        default: Enable bastion host
       KeyPairName:
         default: Key pair name
       OperatorEmail:
         default: Operator email
       ForgeApplicationRuntime:
         default: Forge application runtime
+      ForgeAppName:
+        default: Forge application name
       ForgeClientId:
         default: Forge client ID
       ForgeClientSecret:
@@ -123,15 +125,6 @@ Parameters:
       The Quick Start uses two Availability Zones from your list and preserves the
       logical order you specify.
     Type: List<AWS::EC2::AvailabilityZone::Name>
-  BastionAMIOS:
-    AllowedValues:
-      - Amazon-Linux2-HVM
-      - CentOS-7-HVM
-      - Ubuntu-Server-20.04-LTS-HVM
-      - SUSE-SLES-15-HVM
-    Default: Amazon-Linux2-HVM
-    Description: The Linux distribution for the AMI to be used for the bastion instances.
-    Type: String
   BastionInstanceType:
     AllowedValues:
       - t2.nano
@@ -151,6 +144,13 @@ Parameters:
     ConstraintDescription: Must be a valid email address.
     Description: Email address that notifications of any scaling operations will be
       sent to.
+    Type: String
+  EnableBastionHost:
+    AllowedValues:
+      - Enabled
+      - Disabled
+    Default: Enabled
+    Description: Chose Disabled to skip creation of bastion hosts in the public subnets.
     Type: String
   ForgeApplicationRuntime:
     AllowedValues:
@@ -275,6 +275,14 @@ Parameters:
     Default: '2'
     Description: The minimum number of Forge nodes in the Auto Scaling group.
     Type: String
+  ForgeAppName:
+    Default: forge-viewmodels-nodejs-aws
+    Description: The name of the zip file that contains the packaged Forge application,
+      without the .zip extension. The two provided options are forge-viewmodels-nodejs-aws
+      and forge-viewmodels-netcore-aws. To deploy a custom application, you would
+      need to deploy this Quick Start from your own private S3 bucket and add your
+      custom package in the packages directory.
+    Type: String
   ForgeSiteDomain:
     Description: '[Optional] Domain name of the Forge site. e.g. example.com. Valid
       FQDN required when using SSL.'
@@ -286,6 +294,9 @@ Conditions:
   UsingDefaultBucket: !Equals
     - !Ref 'QSS3BucketName'
     - aws-quickstart
+  UsingBastion: !Equals
+    - !Ref 'EnableBastionHost'
+    - 'Enabled'
 Rules:
   KeyPairsNotEmpty:
     Assertions:
@@ -366,9 +377,10 @@ Resources:
             - !Sub '${QSS3BucketName}-${AWS::Region}'
             - !Ref 'QSS3BucketName'
       Parameters:
-        AvailabilityZones: !Join
-          - ','
-          - !Ref 'AvailabilityZones'
+        AvailabilityZones:
+          Fn::Join:
+            - ','
+            - !Ref 'AvailabilityZones'
         NumberOfAZs: '2'
         PrivateSubnet1ACIDR: !Ref 'PrivateSubnet1CIDR'
         PrivateSubnet2ACIDR: !Ref 'PrivateSubnet2CIDR'
@@ -376,6 +388,7 @@ Resources:
         PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
         VPCCIDR: !Ref 'VPCCIDR'
   BastionStack:
+    Condition: UsingBastion
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
@@ -389,7 +402,6 @@ Resources:
             - !Sub '${QSS3BucketName}-${AWS::Region}'
             - !Ref 'QSS3BucketName'
       Parameters:
-        BastionAMIOS: !Ref 'BastionAMIOS'
         BastionInstanceType: !Ref 'BastionInstanceType'
         KeyPairName: !Ref 'KeyPairName'
         PublicSubnet1ID: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
@@ -406,6 +418,8 @@ Resources:
         RemoteAccessCIDR: !Ref 'RemoteAccessCIDR'
         VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
   ForgeStack:
+    Metadata:
+      PseudoDependsOn: !If [UsingBastion, !Ref BastionStack, !Ref VPCStack]
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub
@@ -423,10 +437,14 @@ Resources:
         ForgeNodesDesiredCapacity: !Ref 'ForgeNodesDesiredCapacity'
         ForgeNodesMaxSize: !Ref 'ForgeNodesMaxSize'
         ForgeNodesMinSize: !Ref 'ForgeNodesMinSize'
-        BastionSecurityGroupID: !GetAtt 'BastionStack.Outputs.BastionSecurityGroupID'
+        BastionSecurityGroupID: !If
+          - UsingBastion
+          - !GetAtt 'BastionStack.Outputs.BastionSecurityGroupID'
+          - ''
         KeyPairName: !Ref 'KeyPairName'
         OperatorEmail: !Ref 'OperatorEmail'
         ForgeApplicationRuntime: !Ref 'ForgeApplicationRuntime'
+        ForgeAppName: !Ref 'ForgeAppName'
         ForgeClientId: !Ref 'ForgeClientId'
         ForgeClientSecret: !Ref 'ForgeClientSecret'
         PrivateSubnet1ID: !GetAtt 'VPCStack.Outputs.PrivateSubnet1AID'

@@ -32,6 +32,14 @@ Parameters:
     Default: t2.large
     Description: Amazon EC2 instance type for the Autodesk Forge instances.
     Type: String
+  ForgeAppName:
+    Default: forge-viewmodels-nodejs-aws
+    Description: The name of the zip file that contains the packaged Forge application,
+      without the .zip extension. The two provided options are forge-viewmodels-nodejs-aws
+      and forge-viewmodels-netcore-aws. To deploy a custom application, you would
+      need to deploy this Quick Start from your own private S3 bucket and add your
+      custom package in the packages directory.
+    Type: String
   ForgeClientIdSSMParameter:
     Description: Forge Client ID SSM parameter
     Type: AWS::SSM::Parameter::Name
@@ -102,52 +110,38 @@ Resources:
       SecurityGroups:
         - !Ref 'WorkloadSecurityGroup'
       UserData: !Base64
-        Fn::Join:
-          - ''
-          - - "#!/bin/bash -ex\n"
-            - "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console)\
-              \ 2>&1\n"
-            - "# update AWS cfn bootsrap\n"
-            - "# yum update -y aws-cfn-bootstrap\n"
-            - "curl --silent --location https://rpm.nodesource.com/setup_8.x | bash\
-              \ -\n"
-            - "yum -y install nodejs\n"
-            - "# install pm2 to restart node app\n"
-            - "npm i -g pm2@2.4.3\n"
-            - "echo export FORGE_AWS_FLAG=1 >> /etc/profile\n"
-            - echo export AWS_REGION=
-            - !Ref 'AWS::Region'
-            - " >> /etc/profile\n"
-            - echo export FORGE_CLIENT_ID=
-            - !Ref 'ForgeClientIdSSMParameter'
-            - " >> /etc/profile\n"
-            - echo export FORGE_CLIENT_SECRET=
-            - !Ref 'ForgeClientSecretSSMParameter'
-            - " >> /etc/profile\n"
-            - "echo export FORGE_APP_NAME=forge-viewmodels-nodejs-aws >> /etc/profile\n"
-            - "source /etc/profile\n"
-            - !Sub
+        Fn::Sub:
+          - |
+            #!/bin/bash -ex
+            exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+            # update AWS cfn bootsrap
+            # yum update -y aws-cfn-bootstrap
+            curl --silent --location https://rpm.nodesource.com/setup_14.x | bash -
+            yum -y install nodejs
+            # install pm2 to restart node app
+            npm i -g pm2@2.4.3
+            echo export FORGE_AWS_FLAG=1 >> /etc/profile
+            echo export AWS_REGION=${AWS::Region} >> /etc/profile
+            echo export FORGE_CLIENT_ID=${ForgeClientIdSSMParameter} >> /etc/profile
+            echo export FORGE_CLIENT_SECRET=${ForgeClientSecretSSMParameter} >> /etc/profile
+            echo export FORGE_APP_NAME=${ForgeAppName} >> /etc/profile
+            source /etc/profile
+            ${Param1}$FORGE_APP_NAME.zip .
+            echo toggle: ${Toggle}
+            unzip $FORGE_APP_NAME.zip
+            cd $FORGE_APP_NAME
+            pwd
+            npm install
+            pm2 start /$FORGE_APP_NAME/start.js -i 0 --name forge-node-app
+
+            # Signal the status from cfn-init
+            /opt/aws/bin/cfn-signal -e $? --stack ${ParentStack} --resource WorkloadAutoScalingGroup --region ${AWS::Region}
+          - Param1: !Sub
               - aws s3 cp s3://${S3Bucket}/${QSS3KeyPrefix}packages/
               - S3Bucket: !If
                   - UsingDefaultBucket
                   - !Sub '${QSS3BucketName}-${AWS::Region}'
                   - !Ref 'QSS3BucketName'
-            - "$FORGE_APP_NAME.zip .\n"
-            - 'echo toggle: '
-            - !Ref 'Toggle'
-            - "\n"
-            - "unzip $FORGE_APP_NAME.zip\n"
-            - "cd $FORGE_APP_NAME\n"
-            - "pwd\n"
-            - "npm install\n"
-            - "pm2 start /$FORGE_APP_NAME/start.js -i 0 --name forge-node-app\n"
-            - "\n"
-            - "# Signal the status from cfn-init\n"
-            - '/opt/aws/bin/cfn-signal -e $? --stack '
-            - !Ref 'ParentStack'
-            - ' --resource WorkloadAutoScalingGroup --region '
-            - !Ref 'AWS::Region'
-            - "\n"
 Outputs:
   WorkloadASLaunchConfig:
     Description: Forge Server Auto Scaling launch configuration

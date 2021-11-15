@@ -1,9 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: >-
-  This template deploys Autodesk Forge in an ASG behind an ALB load balancer in two
-  private subnets. **WARNING** This template creates EC2 instances and related resources.
-  You will be billed for the AWS resources used if you create a stack from this template.
-  (qs-1oqea6241)
+Description: This template deploys Autodesk Forge in an ASG behind an ALB load balancer
+  in two private subnets. **WARNING** This template creates EC2 instances and related
+  resources. You will be billed for the AWS resources used if you create a stack from
+  this template. (qs-1oqea6241)
 Metadata:
   cfn-lint:
     config:
@@ -37,6 +36,7 @@ Metadata:
           default: Autodesk Forge application runtime configuration
         Parameters:
           - ForgeApplicationRuntime
+          - ForgeAppName
       - Label:
           default: Autodesk Forge credentials
         Parameters:
@@ -63,6 +63,8 @@ Metadata:
         default: Operator email
       ForgeApplicationRuntime:
         default: Forge application runtime
+      ForgeAppName:
+        default: Forge application name
       ForgeClientId:
         default: Forge client ID
       ForgeClientSecret:
@@ -107,8 +109,9 @@ Parameters:
     Type: String
   BastionSecurityGroupID:
     Description: ID of the bastion host security group to enable SSH connections (e.g.,
-      sg-7f16e910).
-    Type: AWS::EC2::SecurityGroup::Id
+      sg-7f16e910). Empty value indicates bastion security group is not used.
+    Default: ""
+    Type: String
   KeyPairName:
     Description: The name of an existing public/private key pair, which allows you
       to securely connect to your instance after it launches.
@@ -228,6 +231,14 @@ Parameters:
     Default: '2'
     Description: The minimum number of Forge nodes in the Auto Scaling group.
     Type: String
+  ForgeAppName:
+    Default: forge-viewmodels-nodejs-aws
+    Description: The name of the zip file that contains the packaged Forge application,
+      without the .zip extension. The two provided options are forge-viewmodels-nodejs-aws
+      and forge-viewmodels-netcore-aws. To deploy a custom application, you would
+      need to deploy this Quick Start from your own private S3 bucket and add your
+      custom package in the packages directory.
+    Type: String
   ForgeSiteDomain:
     Description: '[Optional] Domain name of the Forge site. e.g. example.com. Valid
       FQDN required when using SSL.'
@@ -242,6 +253,10 @@ Conditions:
   UseALBSSL: !Not
     - !Equals
       - !Ref 'ALBSSLCertificateARN'
+      - ''
+  UseBastionSG: !Not
+    - !Equals
+      - !Ref 'BastionSecurityGroupID'
       - ''
   ForgeSiteDomainRoute53Condition: !And
     - !Not
@@ -423,6 +438,9 @@ Resources:
             Action:
               - sts:AssumeRole
       Path: /
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
       Policies:
         - PolicyDocument:
             Version: '2012-10-17'
@@ -464,10 +482,14 @@ Resources:
           FromPort: 3000
           ToPort: 3000
           SourceSecurityGroupId: !Ref 'ELBSecurityGroup'
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          SourceSecurityGroupId: !Ref 'BastionSecurityGroupID'
+        - !If
+          - UseBastionSG
+          -
+            IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            SourceSecurityGroupId: !Ref 'BastionSecurityGroupID'
+          - !Ref 'AWS::NoValue'
   WorkloadASLaunchConfigStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -487,6 +509,7 @@ Resources:
             - autodesk-forge-netcore.template.yaml
       Parameters:
         ForgeNodeInstanceType: !Ref 'ForgeNodeInstanceType'
+        ForgeAppName: !Ref 'ForgeAppName'
         KeyPairName: !Ref 'KeyPairName'
         ForgeClientIdSSMParameter: !Ref 'ForgeClientIdSSMParameter'
         ForgeClientSecretSSMParameter: !Ref 'ForgeClientSecretSSMParameter'

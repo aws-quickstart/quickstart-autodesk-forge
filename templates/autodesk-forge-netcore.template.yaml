@@ -8,6 +8,14 @@ Parameters:
     Description: The name of an existing public/private key pair, which allows you
       to securely connect to your instance after it launches.
     Type: AWS::EC2::KeyPair::KeyName
+  ForgeAppName:
+    Default: forge-viewmodels-netcore-aws
+    Description: The name of the zip file that contains the packaged Forge application,
+      without the .zip extension. The two provided options are forge-viewmodels-nodejs-aws
+      and forge-viewmodels-netcore-aws. To deploy a custom application, you would
+      need to deploy this Quick Start from your own private S3 bucket and add your
+      custom package in the packages directory.
+    Type: String
   ForgeNodeInstanceType:
     AllowedValues:
       - t2.nano
@@ -102,53 +110,40 @@ Resources:
       SecurityGroups:
         - !Ref 'WorkloadSecurityGroup'
       UserData: !Base64
-        Fn::Join:
-          - ''
-          - - "#!/bin/bash -ex\n"
-            - "exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console)\
-              \ 2>&1\n"
-            - "# update AWS cfn bootsrap\n"
-            - "# yum update -y aws-cfn-bootstrap\n"
-            - "yum -y update\n"
-            - "rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm\n"
-            - "# install netcore sdk 2.2\n"
-            - "yum install -y dotnet-sdk-2.2\n"
-            - echo export AWS_REGION=
-            - !Ref 'AWS::Region'
-            - " >> /etc/profile\n"
-            - echo export FORGE_CLIENT_ID=
-            - !Ref 'ForgeClientIdSSMParameter'
-            - " >> /etc/profile\n"
-            - echo export FORGE_CLIENT_SECRET=
-            - !Ref 'ForgeClientSecretSSMParameter'
-            - " >> /etc/profile\n"
-            - "echo export FORGE_APP_NAME=forge-viewmodels-netcore-aws >> /etc/profile\n"
-            - "source /etc/profile\n"
-            - !Sub
+        Fn::Sub:
+          - |
+            #!/bin/bash -ex
+            exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+            # update AWS cfn bootsrap
+            # yum update -y aws-cfn-bootstrap
+            yum -y update
+            rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
+            # install netcore sdk 2.2
+            yum install -y dotnet-sdk-2.2
+            echo export AWS_REGION=${AWS::Region} >> /etc/profile
+            echo export FORGE_CLIENT_ID=${ForgeClientIdSSMParameter} >> /etc/profile
+            echo export FORGE_CLIENT_SECRET=${ForgeClientSecretSSMParameter} >> /etc/profile
+            echo export FORGE_APP_NAME=${ForgeAppName} >> /etc/profile
+            source /etc/profile
+            ${Param1}$FORGE_APP_NAME.zip .
+            echo toggle: ${Toggle}
+            unzip $FORGE_APP_NAME.zip
+            cd $FORGE_APP_NAME/Properties
+            sed -i "s/SECRET_TOKEN/$FORGE_CLIENT_SECRET/g" launchSettings.json
+            sed -i "s/ID_TOKEN/$FORGE_CLIENT_ID/g" launchSettings.json
+            sed -i "s/REGION_TOKEN/$AWS_REGION/g" launchSettings.json
+            cd ..
+            export DOTNET_CLI_HOME=`pwd`
+            dotnet build
+            nohup dotnet run > application.log 2>&1 &
+            # Signal the status from cfn-init
+            /opt/aws/bin/cfn-signal -e $? --stack ${ParentStack} --resource WorkloadAutoScalingGroup --region ${AWS::Region}
+          - Param1: !Sub
               - aws s3 cp s3://${S3Bucket}/${QSS3KeyPrefix}packages/
               - S3Bucket: !If
                   - UsingDefaultBucket
                   - !Sub '${QSS3BucketName}-${AWS::Region}'
                   - !Ref 'QSS3BucketName'
-            - "$FORGE_APP_NAME.zip .\n"
-            - 'echo toggle: '
-            - !Ref 'Toggle'
-            - "\n"
-            - "unzip $FORGE_APP_NAME.zip\n"
-            - "cd $FORGE_APP_NAME/Properties\n"
-            - "sed -i \"s/SECRET_TOKEN/$FORGE_CLIENT_SECRET/g\" launchSettings.json\n"
-            - "sed -i \"s/ID_TOKEN/$FORGE_CLIENT_ID/g\" launchSettings.json\n"
-            - "sed -i \"s/REGION_TOKEN/$AWS_REGION/g\" launchSettings.json\n"
-            - "cd ..\n"
-            - "export DOTNET_CLI_HOME=`pwd`\n"
-            - "dotnet build\n"
-            - "nohup dotnet run > application.log 2>&1 &\n"
-            - "# Signal the status from cfn-init\n"
-            - '/opt/aws/bin/cfn-signal -e $? --stack '
-            - !Ref 'ParentStack'
-            - ' --resource WorkloadAutoScalingGroup --region '
-            - !Ref 'AWS::Region'
-            - "\n"
 Outputs:
   WorkloadASLaunchConfig:
     Description: Forge Server Auto Scaling launch configuration
