@@ -26,6 +26,7 @@ tests:
       AvailabilityZones: $[taskcat_genaz_2]
       BastionAMIOS: Amazon-Linux2-HVM
       BastionInstanceType: t2.micro
+      EnableBastionHost: Disabled
       ForgeClientId: override_this
       ForgeClientSecret: override_this
       ForgeNodeInstanceType: t2.micro
@@ -54,12 +55,13 @@ tests:
       - us-east-1
       - us-west-2
     s3_bucket: ''
-    template: templates/autodesk-forge-master.json
+    template: templates/autodesk-forge-main.template.yaml
   forge-netcore:
     parameters:
       AvailabilityZones: $[taskcat_genaz_2]
       BastionAMIOS: Amazon-Linux2-HVM
       BastionInstanceType: t2.micro
+      EnableBastionHost: Disabled
       ForgeApplicationRuntime: ".NET Core"
       ForgeClientId: override_this
       ForgeClientSecret: override_this
@@ -87,4 +89,4 @@ tests:
       - us-east-2
       - us-west-1
     s3_bucket: ''
-    template: templates/autodesk-forge-master.json
+    template: templates/autodesk-forge-main.template.yaml
