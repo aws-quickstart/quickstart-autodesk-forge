@@ -2,8 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: This main template creates a VPC infrastructure for a multi-AZ, multi-tier
   deployment of Autodesk Forge on AWS. It deploys a VPC with bastions and a Forge
   cluster behind an ALB. **WARNING** This template creates EC2 instances and related
-  resources. You will be billed for the AWS resources used if you create a stack from
-  this template. (qs-1oqea623r)
+  resources. You will be billed for the AWS resources used if you create a stack from this template. (qs-1oqea623r)
 Metadata:
   LintSpellExclude:
     - Application
