@@ -1,0 +1,10 @@
+This guide covers the information you need to deploy the {partner-product-name} Partner Solution in the AWS Cloud.
+
+This Quick Start is for IT infrastructure architects, administrators, and DevOps professionals who are planning to implement or extend their Autodesk Forge workloads on the AWS Cloud.
+
+=== Autodesk Forge on AWS
+The Autodesk cloud developer platform—Forge—offers customizable building blocks in the form of web service APIs, tools, and services. With Forge, Autodesk teams, third-party developers, and customers can design and build workflows—across industries. For example, developers use Forge to overlay Internet of Things (IoT) data on top of 3D building information models, to later perform data analysis and create visual reports.
+
+The Forge platform offers connected data and cross-platform integration in a cloud-based environment. Customers can use Forge to integrate the functionality of Autodesk and partner software as a service (SaaS) products into new workflows. They can also create or extend their own web or mobile apps using Forge service components, APIs, and tools.
+
+3D/2D Computer-Aided Design (CAD) data requires fast computing for a seamless user experience and high availability. AWS offers a broad set of global compute, storage, database, analytics, application, and deployment  services that help organizations move faster, lower IT costs, and scale applications

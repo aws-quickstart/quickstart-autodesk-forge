@@ -1,0 +1,27 @@
+:xrefstyle: short
+
+Deploying this Partner Solution with default parameters builds the following {partner-product-short-name} environment in the
+AWS Cloud.
+
+// Replace this example diagram with your own. Follow our wiki guidelines: https://w.amazon.com/bin/view/AWS_Quick_Starts/Process_for_PSAs/#HPrepareyourarchitecturediagram. Upload your source PowerPoint file to the GitHub {deployment name}/docs/images/ directory in its repository.
+
+[#architecture1]
+.Partner Solution architecture for {partner-product-short-name} on AWS
+image::../docs/deployment_guide/images/architecture_diagram.png[Architecture]
+
+As shown in <<architecture1>>, this Partner Solution sets up the following:
+
+* A highly available architecture that spans two Availability Zones.*
+* A virtual private cloud (VPC) configured across two Availability Zones. In each Availability Zone, this Quick Start provisions one public subnet and one private subnet. This creates a logically isolated networking environment that you can connect to your on-premises data centers or use as a standalone environment.*
+* An internet gateway to allow access to the internet. The bastion hosts use this gateway to send and receive traffic.*
+* Managed network address translation (NAT) gateways deployed into the public subnets and configured with an Elastic IP address for outbound internet connectivity. These instances provide internet access for all Amazon Elastic Compute Cloud (Amazon EC2) instances launched within the private network.*
+* In the public subnets, a Linux bastion host in an Auto Scaling group to allow inbound Secure Shell (SSH) access to EC2 instances in public and private subnets.*
+* In the private subnets, Autodesk Forge application server instances across both Availability Zones, to ensure high availability.
+* Auto Scaling enabled for the Autodesk Forge cluster, to automatically add or remove servers based on their use. Auto Scaling provides additional servers during peak hours and lowers costs by removing servers during off hours. This functionality is tightly integrated with the Application Load Balancer, and automatically adds and removes instances from the load balancer. The default installation sets up low and high CPUbased thresholds for scaling the instance capacity up or down. You can modify these thresholds during launch and after deployment.
+* The Elastic Load Balancing service, which provides HTTP and HTTPS load balancing across the Autodesk Forge instances. This Quick Start uses an Application Load Balancer, which is configured to use either HTTP or HTTPS.
+* An AWS Identity and Access Management (IAM) role with fine-grained permissions for access to AWS services necessary for the deployment process.
+* Appropriate security groups for each instance or function to restrict access to only necessary protocols and ports. For example, access to HTTP(S) server ports on Amazon EC2 web servers is limited to the Application Load Balancer.
+* Optionally, Amazon Route 53 as your public Domain Name System (DNS) for resolving your Forge site's domain name. When you choose to deploy the application with a Amazon Web Services - Autodesk Forge on the AWS Cloud custom domain and Security Sockets Layer (SSL) certificate, a new RecordSet in your pre-existing Route 53 Hosted Zone will be created.
+* AWS Systems Manager (SSM) parameters in the AWS Systems Manager Parameter Store to securely store the Forge client ID and secret.
+
+[.small]#* The template that deploys this Partner Solution into an existing VPC skips the components marked by asterisks and prompts you for your existing VPC configuration.#

@@ -1,0 +1,44 @@
+// Include any postdeployment steps here, such as steps necessary to test that the deployment was successful. If there are no postdeployment steps, leave this file empty.
+
+== Postdeployment steps
+
+=== Test the Deployment
+When the AWS CloudFormation template has successfully created the stack, all server nodes will be running with the Autodesk Forge application installed in your AWS account. To access the application, in your preferred browser, go to the Forge application URL listed in the Outputs tab. You'll see a default page that has one sample bucket created for you.
+
+[#postdeploy1]
+.Stack output showing the Forge application URL
+image::../docs/deployment_guide/images/image1.png[Postdeploy]
+
+[postdeploy2]
+.Start page for the Forge application
+image::../docs/deployment_guide/images/image2.png[Postdeploy]
+
+To test this application:
+
+[start=1]
+1. Create Autodesk buckets for your projects. On the Start page, choose New bucket, specify a bucket name, and then choose Go ahead, and create the bucket. 
+
+[postdeploy2]
+.Creating a bucket in the Forge application
+image::../docs/deployment_guide/images/image5.png[Postdeploy]
+
+[start=2]
+2. Upload your CAD files to the recently created Autodesk Forge bucket. For a list of supported CAD formats, see https://forge.autodesk.com/en/docs/model-derivative/v2/developers_guide/supported-translations/[Supported Translation Formats] in the Autodesk Forge Developer's Guide. You can download a sample model of a https://f360ap.autodesk.com/courses/introduction-to-3d-modeling/lessons/lesson-2-create-a-new-cloud-project-upload-and-save-a-3d-model[Reciprocating Saw] after logging in with your Autodesk account to access the Getting Started Guide. Right-click your newly created bucket, choose Upload file, and then upload the Reciprocating Saw file that you downloaded. It may take a minute or so for the file to show up in your bucket depending on your internet connection. You won't be able to view the downloaded file initially, until it is translated. For more information about the pricing of the Autodesk Forge Translation service, see https://forge.autodesk.com/pricing[Pricing] on the Autodesk Forge website.
+
+[postdeploy3]
+.Uploading the model file
+image::../docs/deployment_guide/images/image3.png[Postdeploy]
+
+[start=3]
+3. Choose the uploaded object on the left pane, and choose *Start translation*. This may take a while, depending on the size of your model. For the reciprocating saw model, wait about 2 minutes.
+
+[postdeploy4]
+.Starting the model translation
+image::../docs/deployment_guide/images/image4.png[Postdeploy]
+
+[start=4]
+4. Load the translated CAD file in the Autodesk Forge Viewer
+
+[postdeploy4]
+.CAD file loaded in viewer
+image::../docs/deployment_guide/images/image6.png[Postdeploy]

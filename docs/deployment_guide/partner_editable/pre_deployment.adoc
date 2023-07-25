@@ -1,0 +1,11 @@
+//Include any predeployment steps here, such as signing up for a Marketplace AMI or making any changes to a partner account. If there are no predeployment steps, leave this file empty.
+
+== Predeployment steps
+
+=== Obtain Autodesk Developer Credentials
+
+This Quick Start requires Autodesk developer credentials.
+
+. If you don’t have a Forge Autodesk account, sign up for an account on the https://forge.autodesk.com/[Forge Developer Portal].
+. In the Forge Developer Portal, choose https://forge.autodesk.com/myapps/create[Create App]. For your new app, you can use http://localhost:3000/api/forge/callback/oauth as Callback URL.
+. Take note of the Client ID and Client Secret. You will need to input these, when you launch the Quick Start.
